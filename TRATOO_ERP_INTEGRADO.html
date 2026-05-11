@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRATOO ERP - Sistema Integrado</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f0f0; color: #333; }
+        
+        .navbar {
+            background: linear-gradient(90deg, #1a1a1a 0%, #2a2a2a 100%);
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(253, 185, 19, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 3px solid #FDB913;
+        }
+
+        .navbar-left { display: flex; align-items: center; gap: 1.5rem; }
+        .logo-container { background: white; padding: 0.2rem 0.6rem; border-radius: 8px; max-height: 65px; max-width: 65px; }
+        .logo-container img { max-height: 65px; max-width: 65px; width: auto; object-fit: contain; }
+        .navbar-title { color: #FDB913; font-size: 1.8rem; font-weight: bold; }
+        .navbar-right { display: flex; flex-direction: column; gap: 0.2rem; align-items: flex-end; }
+        .datetime { color: #FDB913; font-weight: bold; font-size: 0.9rem; }
+
+        .container { display: flex; min-height: calc(100vh - 90px); }
+        
+        .sidebar {
+            background: #1a1a1a;
+            width: 280px;
+            padding: 1.5rem;
+            overflow-y: auto;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.2);
+            border-right: 2px solid #FDB913;
+        }
+
+        .menu-section { margin-bottom: 2rem; }
+        .menu-title { color: #FDB913; font-weight: bold; margin-bottom: 0.8rem; padding: 0.8rem; border-left: 3px solid #FDB913; font-size: 0.85rem; text-transform: uppercase; }
+        
+        .menu-item {
+            color: #ddd;
+            padding: 0.8rem 1rem;
+            margin: 0.4rem 0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-size: 0.95rem;
+        }
+
+        .menu-item:hover { background: #FDB913; color: #1a1a1a; padding-left: 1.3rem; font-weight: 600; }
+        .menu-item.active { background: #FDB913; color: #1a1a1a; font-weight: bold; }
+
+        .main-content { flex: 1; padding: 2rem; overflow-y: auto; }
+
+        .page { display: none; }
+        .page.active { display: block; animation: slideIn 0.4s; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+
+        .page-title { color: #1a1a1a; font-size: 2rem; margin-bottom: 2rem; border-bottom: 4px solid #FDB913; padding-bottom: 1rem; }
+
+        .card-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .card { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid #FDB913; }
+        .card-title { color: #666; font-size: 0.85rem; font-weight: bold; text-transform: uppercase; margin-bottom: 0.8rem; }
+        .card-value { color: #FDB913; font-size: 1.8rem; font-weight: bold; }
+
+        .form-container { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 2rem; border-left: 5px solid #FDB913; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: #1a1a1a; font-weight: 600; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.8rem; border: 2px solid #e0e0e0; border-radius: 6px; font-family: inherit; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #FDB913; }
+
+        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+
+        button { background: linear-gradient(90deg, #FDB913 0%, #f0a000 100%); color: #1a1a1a; border: none; padding: 0.9rem 2rem; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.3s; font-size: 0.95rem; text-transform: uppercase; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(253, 185, 19, 0.3); }
+
+        .table-container { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 2rem; border: 2px solid #FDB913; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        table th { background: linear-gradient(90deg, #1a1a1a 0%, #2a2a2a 100%); color: #FDB913; padding: 0.8rem; text-align: left; font-weight: bold; font-size: 0.85rem; text-transform: uppercase; }
+        table td { padding: 0.7rem 0.8rem; border-bottom: 1px solid #f0f0f0; }
+        table tr:hover { background: #fafafa; }
+
+        .status { display: inline-block; padding: 0.3rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
+        .status.ativo { background: #d4edda; color: #155724; }
+        .status.pendente { background: #fff3cd; color: #856404; }
+
+        h3 { color: #1a1a1a; margin-bottom: 1.5rem; font-size: 1.3rem; border-left: 4px solid #FDB913; padding-left: 1rem; }
+
+        .lucro-positivo { color: #28a745; font-weight: bold; }
+        .lucro-negativo { color: #dc3545; font-weight: bold; }
+
+        @media (max-width: 768px) {
+            .form-row { grid-template-columns: 1fr; }
+            .sidebar { width: 100%; }
+            .container { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-left">
+            <div class="logo-container">
+                <img src="logo_tratoo.jpeg" alt="TRATOO" onerror="this.style.display='none'">
+            </div>
+            <div class="navbar-title">TRATOO ERP</div>
+        </div>
+        <div class="navbar-right">
+            <div class="datetime" id="datetime">00/00/0000 00:00:00</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="menu-section">
+                <div class="menu-title">📊 Dashboard</div>
+                <div class="menu-item active" onclick="showPage('dashboard')">📈 Dashboard</div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">💼 Comercial</div>
+                <div class="menu-item" onclick="showPage('clientes')">👥 Clientes</div>
+                <div class="menu-item" onclick="showPage('orcamentos')">📋 Orçamentos</div>
+                <div class="menu-item" onclick="showPage('ordens')">📄 OS</div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">🏗️ Operacional</div>
+                <div class="menu-item" onclick="showPage('agenda')">📅 Agenda</div>
+                <div class="menu-item" onclick="showPage('obras')">🏗️ Obras</div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">🏢 Patrimônio</div>
+                <div class="menu-item" onclick="showPage('maquinas')">🚜 Máquinas</div>
+                <div class="menu-item" onclick="showPage('operadores')">👷 Operadores</div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">📋 Despesas</div>
+                <div class="menu-item" onclick="showPage('fornecedores')">🏪 Fornecedores</div>
+                <div class="menu-item" onclick="showPage('notas')">📄 Notas</div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">💰 Financeiro</div>
+                <div class="menu-item" onclick="showPage('receber')">💳 A Receber</div>
+                <div class="menu-item" onclick="showPage('pagar')">💸 A Pagar</div>
+                <div class="menu-item" onclick="showPage('dre')">📊 DRE</div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">📊 Análise</div>
+                <div class="menu-item" onclick="showPage('custos')">🎯 Centro Custos</div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- DASHBOARD -->
+            <div id="dashboard" class="page active">
+                <h1 class="page-title">📊 Dashboard Executivo</h1>
+                <div class="card-container">
+                    <div class="card">
+                        <div class="card-title">💰 Faturamento</div>
+                        <div class="card-value" id="dash-faturamento">R$ 0,00</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">💸 Despesas</div>
+                        <div class="card-value" id="dash-despesas">R$ 0,00</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">📊 Lucro Líquido</div>
+                        <div class="card-value" id="dash-lucro" style="color: #28a745;">R$ 0,00</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">🏗️ Obras Finalizadas</div>
+                        <div class="card-value" id="dash-obras">0</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">⏱️ Total Horas</div>
+                        <div class="card-value" id="dash-horas">0h</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">📈 Margem %</div>
+                        <div class="card-value" id="dash-margem">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CLIENTES -->
+            <div id="clientes" class="page">
+                <h1 class="page-title">👥 Clientes</h1>
+                <div class="form-container">
+                    <h3>Novo Cliente</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nome Completo *</label>
+                            <input type="text" id="cli-nome" placeholder="João da Silva">
+                        </div>
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" id="cli-email" placeholder="joao@email.com">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>CPF *</label>
+                            <input type="text" id="cli-cpf" placeholder="000.000.000-00">
+                        </div>
+                        <div class="form-group">
+                            <label>CNPJ (Empresa)</label>
+                            <input type="text" id="cli-cnpj" placeholder="00.000.000/0000-00">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Telefone *</label>
+                            <input type="tel" id="cli-tel" placeholder="(85) 98765-4321">
+                        </div>
+                        <div class="form-group">
+                            <label>Cidade</label>
+                            <input type="text" id="cli-cidade" placeholder="Fortaleza">
+                        </div>
+                    </div>
+                    <button onclick="addCliente()">✅ Cadastrar Cliente</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Nome</th><th>CPF/CNPJ</th><th>Email</th><th>Telefone</th><th>Cidade</th></tr>
+                        </thead>
+                        <tbody id="clientes-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ORÇAMENTOS -->
+            <div id="orcamentos" class="page">
+                <h1 class="page-title">📋 Orçamentos</h1>
+                <div class="form-container">
+                    <h3>Novo Orçamento</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Cliente *</label>
+                            <select id="orc-cli"><option value="">Selecione...</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Data *</label>
+                            <input type="date" id="orc-data">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Descrição Serviço</label>
+                            <input type="text" id="orc-desc" placeholder="Terraplanagem, nivelamento...">
+                        </div>
+                        <div class="form-group">
+                            <label>Horas Estimadas *</label>
+                            <input type="number" id="orc-horas" min="1" step="0.5" placeholder="10">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Valor Hora Máquina *</label>
+                            <input type="number" id="orc-vhora" min="0" step="0.01" placeholder="280">
+                        </div>
+                        <div class="form-group">
+                            <label>Margem % *</label>
+                            <input type="number" id="orc-margem" min="0" placeholder="30">
+                        </div>
+                    </div>
+                    <button onclick="addOrcamento()">Criar Orçamento</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Número</th><th>Cliente</th><th>Descrição</th><th>Horas</th><th>Valor</th><th>Data</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="orcamentos-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ORDEM DE SERVIÇO -->
+            <div id="ordens" class="page">
+                <h1 class="page-title">📄 Ordem de Serviço</h1>
+                <div class="form-container">
+                    <h3>Criar OS a partir de Orçamento</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Orçamento *</label>
+                            <select id="os-orc"><option value="">Selecione...</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Máquina *</label>
+                            <select id="os-maq"><option value="">Selecione...</option></select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Operador *</label>
+                            <select id="os-op"><option value="">Selecione...</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Data Início *</label>
+                            <input type="date" id="os-data">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Local da Obra</label>
+                        <input type="text" id="os-local" placeholder="Endereço da obra...">
+                    </div>
+                    <button onclick="addOS()">Criar OS</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Número</th><th>Cliente</th><th>Máquina</th><th>Operador</th><th>Data</th><th>Local</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="ordens-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- AGENDA (COM CALENDÁRIO) -->
+            <div id="agenda" class="page">
+                <h1 class="page-title">📅 Agenda - Semana e Mês</h1>
+                <div style="background: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h3>Próximas Obras Agendadas</h3>
+                    <div id="agenda-lista"></div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Data</th><th>Dia Semana</th><th>OS</th><th>Cliente</th><th>Máquina</th><th>Operador</th><th>Local</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="agenda-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- OBRAS - FINALIZAÇÃO INTEGRADA -->
+            <div id="obras" class="page">
+                <h1 class="page-title">🏗️ Finalizar Obras (Gera Lançamentos)</h1>
+                <div class="form-container" style="background: #fff5e6; border-left: 5px solid #ff9800;">
+                    <h3 style="color: #ff6f00;">⚠️ ATENÇÃO: Ao finalizar a obra, o sistema gera AUTOMATICAMENTE:</h3>
+                    <p style="margin: 1rem 0; color: #333;">✅ Contas a Receber (Cliente) | ✅ Contas a Pagar (Operador) | ✅ Custo Combustível | ✅ Custo Refeição | ✅ Centro de Custos</p>
+                </div>
+
+                <div class="form-container">
+                    <h3>Finalizar Obra</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>OS *</label>
+                            <select id="obra-os"><option value="">Selecione...</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Data Conclusão *</label>
+                            <input type="date" id="obra-data">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Horas Executadas *</label>
+                            <input type="number" id="obra-horas" min="0" step="0.5" placeholder="9.5">
+                        </div>
+                        <div class="form-group">
+                            <label>Combustível Consumido (Litros) *</label>
+                            <input type="number" id="obra-diesel" min="0" step="0.1" placeholder="35">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Preço do Diesel/L</label>
+                            <input type="number" id="obra-preco-diesel" min="0" step="0.01" placeholder="5.50" value="5.50">
+                        </div>
+                        <div class="form-group">
+                            <label>Custo Refeição Operador</label>
+                            <input type="number" id="obra-refeicao" min="0" step="0.01" placeholder="0">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Observações</label>
+                        <textarea id="obra-obs" placeholder="Anotações sobre a obra..." rows="3"></textarea>
+                    </div>
+
+                    <button onclick="finalizarObra()" style="background: linear-gradient(90deg, #28a745 0%, #20c997 100%); font-size: 1.1rem; padding: 1.2rem 2.5rem;">✅ FINALIZAR OBRA E GERAR LANÇAMENTOS</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Data</th><th>OS</th><th>Cliente</th><th>Máquina</th><th>Operador</th><th>Horas</th><th>Diesel (L)</th><th>Faturado</th><th>Custos</th><th>Lucro</th></tr>
+                        </thead>
+                        <tbody id="obras-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- MÁQUINAS - PATRIMÔNIO -->
+            <div id="maquinas" class="page">
+                <h1 class="page-title">🚜 Controle de Patrimônio - Máquinas</h1>
+                <div class="form-container">
+                    <h3>Cadastro de Máquina</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nome da Máquina *</label>
+                            <input type="text" id="maq-nome" placeholder="Retro 1">
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo *</label>
+                            <select id="maq-tipo"><option value="">Selecione...</option><option value="Retro">Retro</option><option value="Caminhão Basculante">Caminhão Basculante</option><option value="Motoniveladora">Motoniveladora</option></select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Placa *</label>
+                            <input type="text" id="maq-placa" placeholder="ABC-1234">
+                        </div>
+                        <div class="form-group">
+                            <label>Valor Hora *</label>
+                            <input type="number" id="maq-valor" min="0" step="0.01" placeholder="280.00">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>GPS/Rastreador</label>
+                            <input type="text" id="maq-gps" placeholder="Código do rastreador">
+                        </div>
+                        <div class="form-group">
+                            <label>Status *</label>
+                            <select id="maq-status"><option value="">Selecione...</option><option value="Ativa">Ativa</option><option value="Manutenção">Manutenção</option><option value="Parada">Parada</option></select>
+                        </div>
+                    </div>
+
+                    <button onclick="addMaquina()">Cadastrar Máquina</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Nome</th><th>Tipo</th><th>Placa</th><th>Valor/Hora</th><th>GPS</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="maquinas-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- OPERADORES - PATRIMÔNIO -->
+            <div id="operadores" class="page">
+                <h1 class="page-title">👷 Controle de Patrimônio - Operadores</h1>
+                <div class="form-container">
+                    <h3>Cadastro de Operador</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nome Completo *</label>
+                            <input type="text" id="op-nome" placeholder="José da Silva">
+                        </div>
+                        <div class="form-group">
+                            <label>CPF *</label>
+                            <input type="text" id="op-cpf" placeholder="000.000.000-00">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Função *</label>
+                            <select id="op-funcao"><option value="">Selecione...</option><option value="Operador Retro">Operador Retro</option><option value="Motorista">Motorista</option><option value="Encarregado">Encarregado</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Contratação *</label>
+                            <select id="op-tipo"><option value="">Selecione...</option><option value="Hora">Por Hora</option><option value="Diária">Diária</option><option value="Mensal">Mensal</option></select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Valor *</label>
+                            <input type="number" id="op-valor" min="0" step="0.01" placeholder="100.00">
+                        </div>
+                        <div class="form-group">
+                            <label>Telefone</label>
+                            <input type="tel" id="op-tel" placeholder="(85) 98765-4321">
+                        </div>
+                    </div>
+
+                    <button onclick="addOperador()">Cadastrar Operador</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Nome</th><th>CPF</th><th>Função</th><th>Contratação</th><th>Valor</th><th>Telefone</th></tr>
+                        </thead>
+                        <tbody id="operadores-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- FORNECEDORES -->
+            <div id="fornecedores" class="page">
+                <h1 class="page-title">🏪 Fornecedores</h1>
+                <div class="form-container">
+                    <h3>Cadastro de Fornecedor</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nome Fornecedor *</label>
+                            <input type="text" id="forn-nome" placeholder="Posto Berimbau">
+                        </div>
+                        <div class="form-group">
+                            <label>CNPJ</label>
+                            <input type="text" id="forn-cnpj" placeholder="00.000.000/0000-00">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Categoria *</label>
+                            <select id="forn-cat"><option value="">Selecione...</option><option value="Combustível">Combustível</option><option value="Manutenção">Manutenção</option><option value="Peças">Peças e Equipamentos</option><option value="Alimentação">Alimentação</option><option value="Outro">Outro</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Telefone</label>
+                            <input type="tel" id="forn-tel" placeholder="(85) 3456-7890">
+                        </div>
+                    </div>
+
+                    <button onclick="addFornecedor()">Cadastrar Fornecedor</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Nome</th><th>CNPJ</th><th>Categoria</th><th>Telefone</th></tr>
+                        </thead>
+                        <tbody id="fornecedores-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- NOTAS FISCAIS / DESPESAS -->
+            <div id="notas" class="page">
+                <h1 class="page-title">📄 Notas Fiscais / Lançamento de Despesas</h1>
+                <div class="form-container">
+                    <h3>Lançar Nota de Despesa</h3>
+                    <p style="color: #666; margin-bottom: 1.5rem;">Exemplo: Combustível no Posto Berimbau, Nota Manutenção, etc.</p>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Fornecedor *</label>
+                            <select id="nota-forn"><option value="">Selecione...</option></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Máquina/Veículo *</label>
+                            <select id="nota-maq"><option value="">Selecione...</option></select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Data da Nota *</label>
+                            <input type="date" id="nota-data">
+                        </div>
+                        <div class="form-group">
+                            <label>Número Nota</label>
+                            <input type="text" id="nota-num" placeholder="123456">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>KM Anterior (Odômetro)</label>
+                            <input type="number" id="nota-km-ant" min="0" placeholder="45000">
+                        </div>
+                        <div class="form-group">
+                            <label>KM Atual (Odômetro)</label>
+                            <input type="number" id="nota-km-atual" min="0" placeholder="45150">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Descrição *</label>
+                            <input type="text" id="nota-desc" placeholder="Diesel, manutenção, peças...">
+                        </div>
+                        <div class="form-group">
+                            <label>Quantidade (L, unid) *</label>
+                            <input type="number" id="nota-qtd" min="0" step="0.1" placeholder="35">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Valor Unitário *</label>
+                            <input type="number" id="nota-vunit" min="0" step="0.01" placeholder="5.50">
+                        </div>
+                        <div class="form-group">
+                            <label>Valor Total *</label>
+                            <input type="number" id="nota-vtotal" min="0" step="0.01" placeholder="192.50">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tipo de Custo *</label>
+                        <select id="nota-tipo"><option value="">Selecione...</option><option value="Combustível">Combustível</option><option value="Manutenção Máquina">Manutenção da Máquina</option><option value="Peças">Peças e Equipamentos</option><option value="Alimentação Operador">Alimentação do Operador</option><option value="Outro Custo">Outro Custo</option></select>
+                    </div>
+
+                    <button onclick="addNota()">Lançar Despesa</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Data</th><th>Fornecedor</th><th>Máquina</th><th>KM</th><th>Descrição</th><th>Qtd</th><th>Valor Total</th><th>Tipo Custo</th></tr>
+                        </thead>
+                        <tbody id="notas-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CONTAS A RECEBER -->
+            <div id="receber" class="page">
+                <h1 class="page-title">💳 Contas a Receber</h1>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Data</th><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Vencimento</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="receber-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CONTAS A PAGAR -->
+            <div id="pagar" class="page">
+                <h1 class="page-title">💸 Contas a Pagar</h1>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr><th>Data</th><th>Beneficiário</th><th>Descrição</th><th>Valor</th><th>Vencimento</th><th>Tipo</th><th>Máquina/Operador</th><th>Status</th></tr>
+                        </thead>
+                        <tbody id="pagar-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DRE -->
+            <div id="dre" class="page">
+                <h1 class="page-title">📊 DRE - Demonstração de Resultado do Exercício</h1>
+                <div class="card-container">
+                    <div class="card">
+                        <div class="card-title">Faturamento Bruto</div>
+                        <div class="card-value" id="dre-faturamento">R$ 0,00</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">(-) Custos Variáveis</div>
+                        <div class="card-value" id="dre-custos">R$ 0,00</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">=  Lucro Bruto</div>
+                        <div class="card-value" id="dre-lucro-bruto">R$ 0,00</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">=  LUCRO LÍQUIDO</div>
+                        <div class="card-value" id="dre-lucro-liquido" style="color: #28a745; font-size: 2.2rem;">R$ 0,00</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Margem Bruta %</div>
+                        <div class="card-value" id="dre-margem-bruta">0%</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Margem Líquida %</div>
+                        <div class="card-value" id="dre-margem-liquida">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CENTRO DE CUSTOS -->
+            <div id="custos" class="page">
+                <h1 class="page-title">🎯 Centro de Custos</h1>
+                <p style="background: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem; color: #666;">Análise detalhada de custos agrupados por máquina e operador</p>
+                <div id="custos-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PRECO_DIESEL = 5.50;
+
+        let dados = {
+            clientes: [],
+            operadores: [],
+            maquinas: [],
+            orcamentos: [],
+            ordens: [],
+            obras: [],
+            fornecedores: [],
+            notas: [],
+            receber: [],
+            pagar: []
+        };
+
+        function carregarDados() {
+            const salvos = localStorage.getItem('tratoo_dados');
+            if (salvos) dados = JSON.parse(salvos);
+        }
+
+        function salvarDados() {
+            localStorage.setItem('tratoo_dados', JSON.stringify(dados));
+            atualizarDashboard();
+        }
+
+        setInterval(() => {
+            const agora = new Date();
+            const data = agora.toLocaleDateString('pt-BR');
+            const hora = agora.toLocaleTimeString('pt-BR');
+            document.getElementById('datetime').textContent = `${data} ${hora}`;
+        }, 1000);
+
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            document.getElementById(pageName).classList.add('active');
+            event.target.closest('.menu-item').classList.add('active');
+            if (pageName === 'custos') gerarCentroCustos();
+        }
+
+        function addCliente() {
+            const nome = document.getElementById('cli-nome').value;
+            const cpf = document.getElementById('cli-cpf').value;
+            if (!nome || !cpf) { alert('Preencha campos obrigatórios'); return; }
+
+            const agora = new Date();
+            const data = agora.toLocaleDateString('pt-BR');
+
+            dados.clientes.push({
+                id: Date.now(),
+                nome,
+                email: document.getElementById('cli-email').value,
+                cpf,
+                cnpj: document.getElementById('cli-cnpj').value,
+                telefone: document.getElementById('cli-tel').value,
+                cidade: document.getElementById('cli-cidade').value,
+                data
+            });
+
+            salvarDados();
+            atualizarClientes();
+            document.getElementById('cli-nome').value = '';
+            document.getElementById('cli-email').value = '';
+            document.getElementById('cli-cpf').value = '';
+            document.getElementById('cli-cnpj').value = '';
+            document.getElementById('cli-tel').value = '';
+            document.getElementById('cli-cidade').value = '';
+        }
+
+        function atualizarClientes() {
+            const tbody = document.getElementById('clientes-tbody');
+            tbody.innerHTML = '';
+            dados.clientes.forEach(cli => {
+                const doc = cli.cpf || cli.cnpj || '-';
+                tbody.innerHTML += `<tr><td>${cli.nome}</td><td>${doc}</td><td>${cli.email || '-'}</td><td>${cli.telefone || '-'}</td><td>${cli.cidade || '-'}</td></tr>`;
+            });
+
+            const select = document.getElementById('orc-cli');
+            select.innerHTML = '<option value="">Selecione...</option>';
+            dados.clientes.forEach(cli => {
+                select.innerHTML += `<option value="${cli.id}">${cli.nome}</option>`;
+            });
+        }
+
+        function addOrcamento() {
+            const cli_id = document.getElementById('orc-cli').value;
+            const horas = parseFloat(document.getElementById('orc-horas').value);
+            const vhora = parseFloat(document.getElementById('orc-vhora').value);
+            const margem = parseFloat(document.getElementById('orc-margem').value);
+            const data = document.getElementById('orc-data').value;
+
+            if (!cli_id || !horas || !vhora || !margem || !data) { alert('Preencha campos obrigatórios'); return; }
+
+            const valor_total = horas * vhora * (1 + margem / 100);
+            const cliente = dados.clientes.find(c => c.id == cli_id);
+
+            dados.orcamentos.push({
+                id: Date.now(),
+                numero: 'ORC-' + Date.now(),
+                cli_id,
+                cliente_nome: cliente.nome,
+                descricao: document.getElementById('orc-desc').value,
+                horas,
+                vhora,
+                margem,
+                valor_total,
+                status: 'Enviado',
+                data
+            });
+
+            salvarDados();
+            atualizarOrcamentos();
+            document.getElementById('orc-cli').value = '';
+            document.getElementById('orc-desc').value = '';
+            document.getElementById('orc-horas').value = '';
+            document.getElementById('orc-vhora').value = '';
+            document.getElementById('orc-margem').value = '';
+            document.getElementById('orc-data').value = '';
+        }
+
+        function atualizarOrcamentos() {
+            const tbody = document.getElementById('orcamentos-tbody');
+            tbody.innerHTML = '';
+            dados.orcamentos.forEach(orc => {
+                tbody.innerHTML += `<tr><td>${orc.numero}</td><td>${orc.cliente_nome}</td><td>${orc.descricao}</td><td>${orc.horas}h</td><td>R$ ${orc.valor_total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td><td>${orc.data}</td><td>${orc.status}</td></tr>`;
+            });
+
+            const select = document.getElementById('os-orc');
+            select.innerHTML = '<option value="">Selecione...</option>';
+            dados.orcamentos.forEach(orc => {
+                select.innerHTML += `<option value="${orc.id}">${orc.numero} - ${orc.cliente_nome}</option>`;
+            });
+        }
+
+        function addMaquina() {
+            const nome = document.getElementById('maq-nome').value;
+            const tipo = document.getElementById('maq-tipo').value;
+            const placa = document.getElementById('maq-placa').value;
+            const valor = parseFloat(document.getElementById('maq-valor').value);
+            const status = document.getElementById('maq-status').value;
+
+            if (!nome || !tipo || !placa || !valor || !status) { alert('Preencha campos obrigatórios'); return; }
+
+            const agora = new Date();
+            const data = agora.toLocaleDateString('pt-BR');
+
+            dados.maquinas.push({
+                id: Date.now(),
+                nome,
+                tipo,
+                placa,
+                valor_hora: valor,
+                gps: document.getElementById('maq-gps').value,
+                status,
+                data
+            });
+
+            salvarDados();
+            atualizarMaquinas();
+            document.getElementById('maq-nome').value = '';
+            document.getElementById('maq-tipo').value = '';
+            document.getElementById('maq-placa').value = '';
+            document.getElementById('maq-valor').value = '';
+            document.getElementById('maq-gps').value = '';
+            document.getElementById('maq-status').value = '';
+        }
+
+        function atualizarMaquinas() {
+            const tbody = document.getElementById('maquinas-tbody');
+            tbody.innerHTML = '';
+            dados.maquinas.forEach(maq => {
+                tbody.innerHTML += `<tr><td>${maq.nome}</td><td>${maq.tipo}</td><td><strong>${maq.placa}</strong></td><td>R$ ${maq.valor_hora.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td><td>${maq.gps || '-'}</td><td><span class="status ${maq.status === 'Ativa' ? 'ativo' : 'pendente'}">${maq.status}</span></td></tr>`;
+            });
+
+            const select = document.getElementById('os-maq');
+            select.innerHTML = '<option value="">Selecione...</option>';
+            dados.maquinas.forEach(maq => {
+                select.innerHTML += `<option value="${maq.id}">${maq.nome} (${maq.placa})</option>`;
+            });
+
+            const selectNota = document.getElementById('nota-maq');
+            selectNota.innerHTML = '<option value="">Selecione...</option>';
+            dados.maquinas.forEach(maq => {
+                selectNota.innerHTML += `<option value="${maq.id}">${maq.nome} (${maq.placa})</option>`;
+            });
+        }
+
+        function addOperador() {
+            const nome = document.getElementById('op-nome').value;
+            const cpf = document.getElementById('op-cpf').value;
+            const funcao = document.getElementById('op-funcao').value;
+            const tipo = document.getElementById('op-tipo').value;
+            const valor = parseFloat(document.getElementById('op-valor').value);
+
+            if (!nome || !cpf || !funcao || !tipo || !valor) { alert('Preencha campos obrigatórios'); return; }
+
+            const agora = new Date();
+            const data = agora.toLocaleDateString('pt-BR');
+
+            dados.operadores.push({
+                id: Date.now(),
+                nome,
+                cpf,
+                funcao,
+                tipo,
+                valor,
+                telefone: document.getElementById('op-tel').value,
+                data
+            });
+
+            salvarDados();
+            atualizarOperadores();
+            document.getElementById('op-nome').value = '';
+            document.getElementById('op-cpf').value = '';
+            document.getElementById('op-funcao').value = '';
+            document.getElementById('op-tipo').value = '';
+            document.getElementById('op-valor').value = '';
+            document.getElementById('op-tel').value = '';
+        }
+
+        function atualizarOperadores() {
+            const tbody = document.getElementById('operadores-tbody');
+            tbody.innerHTML = '';
+            dados.operadores.forEach(op => {
+                tbody.innerHTML += `<tr><td>${op.nome}</td><td>${op.cpf}</td><td>${op.funcao}</td><td>${op.tipo}</td><td>R$ ${op.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td><td>${op.telefone || '-'}</td></tr>`;
+            });
+
+            const select = document.getElementById('os-op');
+            select.innerHTML = '<option value="">Selecione...</option>';
+            dados.operadores.forEach(op => {
+                select.innerHTML += `<option value="${op.id}">${op.nome}</option>`;
+            });
+        }
+
+        function addFornecedor() {
+            const nome = document.getElementById('forn-nome').value;
+            const cat = document.getElementById('forn-cat').value;
+
+            if (!nome || !cat) { alert('Preencha campos obrigatórios'); return; }
+
+            const agora = new Date();
+            const data = agora.toLocaleDateString('pt-BR');
+
+            dados.fornecedores.push({
+                id: Date.now(),
+                nome,
+                cnpj: document.getElementById('forn-cnpj').value,
+                categoria: cat,
+                telefone: document.getElementById('forn-tel').value,
+                data
+            });
+
+            salvarDados();
+            atualizarFornecedores();
+            document.getElementById('forn-nome').value = '';
+            document.getElementById('forn-cnpj').value = '';
+            document.getElementById('forn-cat').value = '';
+            document.getElementById('forn-tel').value = '';
+        }
+
+        function atualizarFornecedores() {
+            const tbody = document.getElementById('fornecedores-tbody');
+            tbody.innerHTML = '';
+            dados.fornecedores.forEach(forn => {
+                tbody.innerHTML += `<tr><td>${forn.nome}</td><td>${forn.cnpj || '-'}</td><td>${forn.categoria}</td><td>${forn.telefone || '-'}</td></tr>`;
+            });
+
+            const select = document.getElementById('nota-forn');
+            select.innerHTML = '<option value="">Selecione...</option>';
+            dados.fornecedores.forEach(forn => {
+                select.innerHTML += `<option value="${forn.id}">${forn.nome}</option>`;
+            });
+        }
+
+        function addOS() {
+            const orc_id = document.getElementById('os-orc').value;
+            const maq_id = document.getElementById('os-maq').value;
+            const op_id = document.getElementById('os-op').value;
+            const data = document.getElementById('os-data').value;
+
+            if (!orc_id || !maq_id || !op_id || !data) { alert('Preencha campos obrigatórios'); return; }
+
+            const orc = dados.orcamentos.find(o => o.id == orc_id);
+            const maq = dados.maquinas.find(m => m.id == maq_id);
+            const op = dados.operadores.find(o => o.id == op_id);
+
+            dados.ordens.push({
+                id: Date.now(),
+                numero: 'OS-' + Date.now(),
+                orc_id,
+                cli_id: orc.cli_id,
+                cliente_nome: orc.cliente_nome,
+                maq_id,
+                maq_nome: maq.nome,
+                op_id,
+                op_nome: op.nome,
+                horas: orc.horas,
+                valor_hora: orc.vhora,
+                valor_total: orc.valor_total,
+                local: document.getElementById('os-local').value,
+                status: 'Criada',
+                data
+            });
+
+            orc.status = 'Convertida';
+            salvarDados();
+            atualizarOrdens();
+            atualizarAgenda();
+            document.getElementById('os-orc').value = '';
+            document.getElementById('os-maq').value = '';
+            document.getElementById('os-op').value = '';
+            document.getElementById('os-data').value = '';
+            document.getElementById('os-local').value = '';
+        }
+
+        function atualizarOrdens() {
+            const tbody = document.getElementById('ordens-tbody');
+            tbody.innerHTML = '';
+            dados.ordens.forEach(os => {
+                tbody.innerHTML += `<tr><td>${os.numero}</td><td>${os.cliente_nome}</td><td>${os.maq_nome}</td><td>${os.op_nome}</td><td>${os.data}</td><td>${os.local || '-'}</td><td><span class="status ${os.status === 'Finalizada' ? 'pago' : 'pendente'}">${os.status}</span></td></tr>`;
+            });
+
+            const select = document.getElementById('obra-os');
+            select.innerHTML = '<option value="">Selecione...</option>';
+            dados.ordens.filter(o => o.status !== 'Finalizada').forEach(os => {
+                select.innerHTML += `<option value="${os.id}">${os.numero} - ${os.cliente_nome}</option>`;
+            });
+        }
+
+        function atualizarAgenda() {
+            const tbody = document.getElementById('agenda-tbody');
+            const listaDiv = document.getElementById('agenda-lista');
+            
+            tbody.innerHTML = '';
+            listaDiv.innerHTML = '';
+            
+            // Ordenar por data
+            const ordensOrdenadas = [...dados.ordens].sort((a, b) => new Date(a.data) - new Date(b.data));
+            
+            ordensOrdenadas.forEach(os => {
+                const data = new Date(os.data + 'T00:00:00');
+                const diaSemana = data.toLocaleDateString('pt-BR', { weekday: 'long' });
+                
+                tbody.innerHTML += `<tr><td>${os.data}</td><td>${diaSemana}</td><td>${os.numero}</td><td>${os.cliente_nome}</td><td>${os.maq_nome}</td><td>${os.op_nome}</td><td>${os.local || '-'}</td><td><span class="status ${os.status === 'Finalizada' ? 'pago' : 'pendente'}">${os.status}</span></td></tr>`;
+                
+                if (os.status !== 'Finalizada') {
+                    listaDiv.innerHTML += `<div style="padding: 1rem; background: #f9f9f9; border-left: 4px solid #FDB913; margin-bottom: 1rem; border-radius: 6px;">
+                        <strong>${os.data} (${diaSemana})</strong> - ${os.numero} | Cliente: <strong>${os.cliente_nome}</strong> | Máquina: ${os.maq_nome} | Operador: ${os.op_nome}
+                    </div>`;
+                }
+            });
+        }
+
+        function addNota() {
+            const forn_id = document.getElementById('nota-forn').value;
+            const maq_id = document.getElementById('nota-maq').value;
+            const data = document.getElementById('nota-data').value;
+            const desc = document.getElementById('nota-desc').value;
+            const qtd = parseFloat(document.getElementById('nota-qtd').value);
+            const vunit = parseFloat(document.getElementById('nota-vunit').value);
+            const vtotal = parseFloat(document.getElementById('nota-vtotal').value);
+            const tipo = document.getElementById('nota-tipo').value;
+
+            if (!forn_id || !maq_id || !data || !desc || !qtd || !vunit || !vtotal || !tipo) { alert('Preencha campos obrigatórios'); return; }
+
+            const fornecedor = dados.fornecedores.find(f => f.id == forn_id);
+            const maquina = dados.maquinas.find(m => m.id == maq_id);
+
+            const km_ant = document.getElementById('nota-km-ant').value || 0;
+            const km_atual = document.getElementById('nota-km-atual').value || 0;
+            const km_rodado = km_atual - km_ant;
+
+            dados.notas.push({
+                id: Date.now(),
+                forn_id,
+                forn_nome: fornecedor.nome,
+                maq_id,
+                maq_nome: maquina.nome,
+                numero: document.getElementById('nota-num').value || Date.now(),
+                data,
+                km_anterior: km_ant,
+                km_atual: km_atual,
+                km_rodado: km_rodado,
+                descricao: desc,
+                quantidade: qtd,
+                vunit,
+                vtotal,
+                tipo_custo: tipo
+            });
+
+            // Adicionar automaticamente em Contas a Pagar
+            const vencimento = new Date(data);
+            vencimento.setDate(vencimento.getDate() + 30);
+
+            dados.pagar.push({
+                id: Date.now(),
+                nota_id: dados.notas[dados.notas.length - 1].id,
+                data,
+                beneficiario: fornecedor.nome,
+                descricao: desc,
+                valor: vtotal,
+                vencimento: vencimento.toLocaleDateString('pt-BR'),
+                tipo: 'Fornecedor',
+                maquina_op: maquina.nome,
+                status: 'Aberto'
+            });
+
+            salvarDados();
+            atualizarNotas();
+            atualizarPagar();
+            document.getElementById('nota-forn').value = '';
+            document.getElementById('nota-maq').value = '';
+            document.getElementById('nota-data').value = '';
+            document.getElementById('nota-num').value = '';
+            document.getElementById('nota-km-ant').value = '';
+            document.getElementById('nota-km-atual').value = '';
+            document.getElementById('nota-desc').value = '';
+            document.getElementById('nota-qtd').value = '';
+            document.getElementById('nota-vunit').value = '';
+            document.getElementById('nota-vtotal').value = '';
+            document.getElementById('nota-tipo').value = '';
+        }
+
+        function atualizarNotas() {
+            const tbody = document.getElementById('notas-tbody');
+            tbody.innerHTML = '';
+            dados.notas.forEach(nota => {
+                const km = nota.km_rodado ? `${nota.km_anterior}-${nota.km_atual}` : '-';
+                tbody.innerHTML += `<tr><td>${nota.data}</td><td>${nota.forn_nome}</td><td>${nota.maq_nome}</td><td>${km}</td><td>${nota.descricao}</td><td>${nota.quantidade}</td><td>R$ ${nota.vtotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td><td>${nota.tipo_custo}</td></tr>`;
+            });
+        }
+
+        function finalizarObra() {
+            const os_id = document.getElementById('obra-os').value;
+            const data = document.getElementById('obra-data').value;
+            const horas = parseFloat(document.getElementById('obra-horas').value);
+            const diesel = parseFloat(document.getElementById('obra-diesel').value) || 0;
+            const preco_diesel = parseFloat(document.getElementById('obra-preco-diesel').value) || PRECO_DIESEL;
+            const refeicao = parseFloat(document.getElementById('obra-refeicao').value) || 0;
+
+            if (!os_id || !data || !horas) { alert('Preencha campos obrigatórios'); return; }
+
+            const os = dados.ordens.find(o => o.id == os_id);
+            const maq = dados.maquinas.find(m => m.id == os.maq_id);
+            const op = dados.operadores.find(o => o.id == os.op_id);
+            const cliente = dados.clientes.find(c => c.id == os.cli_id);
+
+            // Cálculo de custos
+            const custo_maquina = horas * maq.valor_hora;
+            
+            let custo_operador = 0;
+            if (op.tipo === 'Hora') {
+                custo_operador = horas * op.valor;
+            } else if (op.tipo === 'Diária') {
+                custo_operador = op.valor;
+            } else if (op.tipo === 'Mensal') {
+                custo_operador = op.valor / 30;
+            }
+
+            const custo_diesel = diesel * preco_diesel;
+            const custo_refeicao = refeicao;
+            const custo_total = custo_maquina + custo_operador + custo_diesel + custo_refeicao;
+            const lucro = os.valor_total - custo_total;
+
+            // Adicionar obra
+            dados.obras.push({
+                id: Date.now(),
+                os_id,
+                os_numero: os.numero,
+                cli_id: os.cli_id,
+                cliente_nome: os.cliente_nome,
+                maq_id: os.maq_id,
+                maq_nome: os.maq_nome,
+                op_id: os.op_id,
+                op_nome: os.op_nome,
+                data,
+                horas,
+                diesel,
+                custo_maquina,
+                custo_operador,
+                custo_diesel,
+                custo_refeicao,
+                custo_total,
+                valor_faturado: os.valor_total,
+                lucro,
+                obs: document.getElementById('obra-obs').value
+            });
+
+            // GERAR AUTOMATICAMENTE: Contas a Receber
+            const vencimento_receber = new Date(data);
+            vencimento_receber.setDate(vencimento_receber.getDate() + 7);
+
+            dados.receber.push({
+                id: Date.now(),
+                obra_id: dados.obras[dados.obras.length - 1].id,
+                data,
+                cliente: cliente.nome,
+                descricao: `Faturamento - ${os.numero}`,
+                valor: os.valor_total,
+                vencimento: vencimento_receber.toLocaleDateString('pt-BR'),
+                status: 'Pendente'
+            });
+
+            // GERAR AUTOMATICAMENTE: Contas a Pagar (Operador)
+            const vencimento_op = new Date(data);
+            vencimento_op.setDate(vencimento_op.getDate() + 30);
+
+            dados.pagar.push({
+                id: Date.now(),
+                obra_id: dados.obras[dados.obras.length - 1].id,
+                data,
+                beneficiario: op.nome,
+                descricao: `Custo Operador - ${os.numero}`,
+                valor: custo_operador,
+                vencimento: vencimento_op.toLocaleDateString('pt-BR'),
+                tipo: 'Operador',
+                maquina_op: op.nome,
+                status: 'Aberto'
+            });
+
+            // GERAR AUTOMATICAMENTE: Contas a Pagar (Combustível)
+            if (diesel > 0) {
+                dados.pagar.push({
+                    id: Date.now(),
+                    obra_id: dados.obras[dados.obras.length - 1].id,
+                    data,
+                    beneficiario: 'Combustível',
+                    descricao: `Diesel - ${os.numero} (${diesel}L)`,
+                    valor: custo_diesel,
+                    vencimento: vencimento_op.toLocaleDateString('pt-BR'),
+                    tipo: 'Combustível',
+                    maquina_op: maq.nome,
+                    status: 'Aberto'
+                });
+            }
+
+            // GERAR AUTOMATICAMENTE: Contas a Pagar (Refeição)
+            if (refeicao > 0) {
+                dados.pagar.push({
+                    id: Date.now(),
+                    obra_id: dados.obras[dados.obras.length - 1].id,
+                    data,
+                    beneficiario: 'Refeição',
+                    descricao: `Refeição Operador - ${os.numero}`,
+                    valor: refeicao,
+                    vencimento: vencimento_op.toLocaleDateString('pt-BR'),
+                    tipo: 'Refeição',
+                    maquina_op: op.nome,
+                    status: 'Aberto'
+                });
+            }
+
+            os.status = 'Finalizada';
+            salvarDados();
+            atualizarOrdens();
+            atualizarObras();
+            atualizarReceber();
+            atualizarPagar();
+            atualizarAgenda();
+
+            alert(`✅ OBRA FINALIZADA!\n\nOs seguintes lançamentos foram criados automaticamente:\n\n✅ Contas a Receber: R$ ${os.valor_total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n✅ Contas a Pagar Operador: R$ ${custo_operador.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n✅ Contas a Pagar Combustível: R$ ${custo_diesel.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n✅ Contas a Pagar Refeição: R$ ${refeicao.toLocaleString('pt-BR', {minimumFractionDigits: 2})}\n\n📊 LUCRO: R$ ${lucro.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`);
+
+            document.getElementById('obra-os').value = '';
+            document.getElementById('obra-data').value = '';
+            document.getElementById('obra-horas').value = '';
+            document.getElementById('obra-diesel').value = '';
+            document.getElementById('obra-refeicao').value = '';
+            document.getElementById('obra-obs').value = '';
+        }
+
+        function atualizarObras() {
+            const tbody = document.getElementById('obras-tbody');
+            tbody.innerHTML = '';
+            dados.obras.forEach(obra => {
+                const corLucro = obra.lucro >= 0 ? 'class="lucro-positivo"' : 'class="lucro-negativo"';
+                tbody.innerHTML += `<tr><td>${obra.data}</td><td>${obra.os_numero}</td><td>${obra.cliente_nome}</td><td>${obra.maq_nome}</td><td>${obra.op_nome}</td><td>${obra.horas}h</td><td>${obra.diesel}L</td><td>R$ ${obra.valor_faturado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td><td>R$ ${obra.custo_total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td><td ${corLucro}>R$ ${obra.lucro.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td></tr>`;
+            });
+        }
+
+        function atualizarReceber() {
+            const tbody = document.getElementById('receber-tbody');
+            tbody.innerHTML = '';
+            dados.receber.forEach(rec => {
+                tbody.innerHTML += `<tr><td>${rec.data}</td><td>${rec.cliente}</td><td>${rec.descricao}</td><td>R$ ${rec.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td><td>${rec.vencimento}</td><td><span class="status ${rec.status === 'Pago' ? 'pago' : 'pendente'}">${rec.status}</span></td></tr>`;
+            });
+        }
+
+        function atualizarPagar() {
+            const tbody = document.getElementById('pagar-tbody');
+            tbody.innerHTML = '';
+            dados.pagar.forEach(pag => {
+                tbody.innerHTML += `<tr><td>${pag.data}</td><td>${pag.beneficiario}</td><td>${pag.descricao}</td><td>R$ ${pag.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td><td>${pag.vencimento}</td><td>${pag.tipo}</td><td>${pag.maquina_op || '-'}</td><td><span class="status ${pag.status === 'Pago' ? 'pago' : 'pendente'}">${pag.status}</span></td></tr>`;
+            });
+        }
+
+        function gerarCentroCustos() {
+            const container = document.getElementById('custos-container');
+            let html = '<div style="display: grid; gap: 2rem;">';
+
+            // Por máquina
+            html += '<div><h3>Centro de Custos - Máquinas</h3>';
+            const maquinasCC = {};
+            dados.obras.forEach(obra => {
+                if (!maquinasCC[obra.maq_nome]) {
+                    maquinasCC[obra.maq_nome] = { horas: 0, faturamento: 0, custos: 0, lucro: 0 };
+                }
+                maquinasCC[obra.maq_nome].horas += obra.horas;
+                maquinasCC[obra.maq_nome].faturamento += obra.valor_faturado;
+                maquinasCC[obra.maq_nome].custos += obra.custo_total;
+                maquinasCC[obra.maq_nome].lucro += obra.lucro;
+            });
+
+            dados.notas.forEach(nota => {
+                if (maquinasCC[nota.maq_nome]) {
+                    maquinasCC[nota.maq_nome].custos += nota.vtotal;
+                }
+            });
+
+            html += '<div class="table-container"><table><thead><tr><th>Máquina</th><th>Horas</th><th>Faturamento</th><th>Custos</th><th>Lucro</th><th>Margem %</th></tr></thead><tbody>';
+            Object.entries(maquinasCC).forEach(([maq, cc]) => {
+                const margem = cc.faturamento > 0 ? ((cc.lucro / cc.faturamento) * 100).toFixed(1) : 0;
+                const corLucro = cc.lucro >= 0 ? 'color: #28a745;' : 'color: #dc3545;';
+                html += `<tr><td><strong>${maq}</strong></td><td>${cc.horas}h</td><td>R$ ${cc.faturamento.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td><td>R$ ${cc.custos.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td><td style="${corLucro}"><strong>R$ ${cc.lucro.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td><td>${margem}%</td></tr>`;
+            });
+            html += '</tbody></table></div></div>';
+
+            // Por operador
+            html += '<div><h3>Centro de Custos - Operadores</h3>';
+            const operadoresCC = {};
+            dados.obras.forEach(obra => {
+                if (!operadoresCC[obra.op_nome]) {
+                    operadoresCC[obra.op_nome] = { obras: 0, horas: 0, custo: 0 };
+                }
+                operadoresCC[obra.op_nome].obras += 1;
+                operadoresCC[obra.op_nome].horas += obra.horas;
+                operadoresCC[obra.op_nome].custo += obra.custo_operador;
+            });
+
+            html += '<div class="table-container"><table><thead><tr><th>Operador</th><th>Obras</th><th>Horas</th><th>Custo Total</th><th>Custo/Hora</th></tr></thead><tbody>';
+            Object.entries(operadoresCC).forEach(([op, cc]) => {
+                const custo_hora = cc.horas > 0 ? (cc.custo / cc.horas).toFixed(2) : 0;
+                html += `<tr><td><strong>${op}</strong></td><td>${cc.obras}</td><td>${cc.horas}h</td><td>R$ ${cc.custo.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td><td>R$ ${custo_hora.replace('.', ',')}</td></tr>`;
+            });
+            html += '</tbody></table></div></div>';
+
+            container.innerHTML = html;
+        }
+
+        function atualizarDashboard() {
+            const faturamento = dados.obras.reduce((sum, o) => sum + o.valor_faturado, 0);
+            const despesas = dados.obras.reduce((sum, o) => sum + o.custo_total, 0) + dados.notas.reduce((sum, n) => sum + n.vtotal, 0);
+            const lucro = faturamento - despesas;
+            const horas_totais = dados.obras.reduce((sum, o) => sum + o.horas, 0);
+            const margem = faturamento > 0 ? ((lucro / faturamento) * 100).toFixed(1) : 0;
+
+            document.getElementById('dash-faturamento').textContent = `R$ ${faturamento.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('dash-despesas').textContent = `R$ ${despesas.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('dash-lucro').textContent = `R$ ${lucro.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('dash-obras').textContent = dados.obras.length;
+            document.getElementById('dash-horas').textContent = horas_totais.toFixed(1) + 'h';
+            document.getElementById('dash-margem').textContent = margem + '%';
+
+            document.getElementById('dre-faturamento').textContent = `R$ ${faturamento.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('dre-custos').textContent = `R$ ${despesas.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('dre-lucro-bruto').textContent = `R$ ${(faturamento - despesas).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('dre-lucro-liquido').textContent = `R$ ${lucro.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('dre-margem-bruta').textContent = margem + '%';
+            document.getElementById('dre-margem-liquida').textContent = margem + '%';
+        }
+
+        carregarDados();
+        atualizarClientes();
+        atualizarOrcamentos();
+        atualizarMaquinas();
+        atualizarOperadores();
+        atualizarFornecedores();
+        atualizarOrdens();
+        atualizarAgenda();
+        atualizarNotas();
+        atualizarObras();
+        atualizarReceber();
+        atualizarPagar();
+        atualizarDashboard();
+    </script>
+</body>
+</html>
