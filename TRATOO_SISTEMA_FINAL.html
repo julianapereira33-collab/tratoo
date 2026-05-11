@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRATOO - Gestão de Terraplanagem</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, #1a1a1a 0%, #2a2a2a 100%);
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(253, 185, 19, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 3px solid #FDB913;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .logo-container {
+            background: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            max-height: 65px;
+            max-width: 65px;
+        }
+
+        .logo-container img {
+            max-height: 65px;
+            max-width: 65px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .navbar-title {
+            color: #FDB913;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .navbar-right {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+            align-items: flex-end;
+        }
+
+        .datetime {
+            color: #FDB913;
+            font-weight: bold;
+        }
+
+        .date {
+            font-size: 0.9rem;
+        }
+
+        .time {
+            font-size: 1.1rem;
+        }
+
+        .container {
+            display: flex;
+            min-height: calc(100vh - 90px);
+        }
+
+        .sidebar {
+            background: #1a1a1a;
+            width: 260px;
+            padding: 1.5rem;
+            overflow-y: auto;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.2);
+            border-right: 2px solid #FDB913;
+        }
+
+        .menu-section {
+            margin-bottom: 2rem;
+        }
+
+        .menu-title {
+            color: #FDB913;
+            font-weight: bold;
+            margin-bottom: 0.8rem;
+            padding: 0.8rem;
+            border-left: 3px solid #FDB913;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-item {
+            color: #ddd;
+            padding: 0.8rem 1rem;
+            margin: 0.4rem 0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-size: 0.95rem;
+        }
+
+        .menu-item:hover {
+            background: #FDB913;
+            color: #1a1a1a;
+            border-left: 3px solid #1a1a1a;
+            padding-left: 1.3rem;
+            font-weight: 600;
+        }
+
+        .menu-item.active {
+            background: #FDB913;
+            color: #1a1a1a;
+            border-left: 3px solid #1a1a1a;
+            font-weight: bold;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: linear-gradient(135deg, #f0f0f0 0%, #e8e8e8 100%);
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: slideIn 0.4s;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .page-title {
+            color: #1a1a1a;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 4px solid #FDB913;
+            padding-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-top: 5px solid #FDB913;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(253, 185, 19, 0.2);
+        }
+
+        .card-title {
+            color: #666;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        .card-value {
+            color: #FDB913;
+            font-size: 2.2rem;
+            font-weight: bold;
+        }
+
+        .form-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            border-left: 5px solid #FDB913;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #1a1a1a;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #FDB913;
+            box-shadow: 0 0 0 3px rgba(253, 185, 19, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        button {
+            background: linear-gradient(90deg, #FDB913 0%, #f0a000 100%);
+            color: #1a1a1a;
+            border: none;
+            padding: 0.9rem 2rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(253, 185, 19, 0.3);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            border: 2px solid #FDB913;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th {
+            background: linear-gradient(90deg, #1a1a1a 0%, #2a2a2a 100%);
+            color: #FDB913;
+            padding: 1.2rem;
+            text-align: left;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        table td {
+            padding: 1rem 1.2rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        table tr:hover {
+            background: #fafafa;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status.ativo {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.pendente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        h3 {
+            color: #1a1a1a;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            border-left: 4px solid #FDB913;
+            padding-left: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                height: auto;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .card-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="navbar-left">
+            <div class="logo-container">
+                <img src="logo_tratoo.jpeg" alt="TRATOO Logo" onerror="this.style.display='none'">
+            </div>
+            <div class="navbar-title">TRATOO PRO</div>
+        </div>
+        <div class="navbar-right">
+            <div class="datetime">
+                <div class="date" id="date">00/00/0000</div>
+                <div class="time" id="time">00:00:00</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="menu-section">
+                <div class="menu-title">📊 Comercial</div>
+                <div class="menu-item active" onclick="showPage('dashboard')">📈 Dashboard</div>
+                <div class="menu-item" onclick="showPage('clientes')">👥 Clientes</div>
+                <div class="menu-item" onclick="showPage('orcamentos')">📋 Orçamentos</div>
+                <div class="menu-item" onclick="showPage('ordens')">📄 OS</div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">🏗️ Operacional</div>
+                <div class="menu-item" onclick="showPage('agenda')">📅 Agenda</div>
+                <div class="menu-item" onclick="showPage('obras')">🏗️ Obras</div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">🚜 Frota</div>
+                <div class="menu-item" onclick="showPage('maquinas')">🚜 Máquinas</div>
+                <div class="menu-item" onclick="showPage('analise')">📊 Análise</div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">👷 Pessoal</div>
+                <div class="menu-item" onclick="showPage('operadores')">👷 Operadores</div>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-title">💰 Financeiro</div>
+                <div class="menu-item" onclick="showPage('receber')">💳 A Receber</div>
+                <div class="menu-item" onclick="showPage('pagar')">💸 A Pagar</div>
+                <div class="menu-item" onclick="showPage('dre')">📊 DRE</div>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- DASHBOARD -->
+            <div id="dashboard" class="page active">
+                <h1 class="page-title">📊 Dashboard</h1>
+                <div class="card-container">
+                    <div class="card">
+                        <div class="card-title">💰 Faturamento</div>
+                        <div class="card-value" id="faturamento">R$ 0,00</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">💸 Custos</div>
+                        <div class="card-value" id="custos">R$ 0,00</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">📊 Lucro</div>
+                        <div class="card-value" id="lucro" style="color: #28a745;">R$ 0,00</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">🏗️ Obras</div>
+                        <div class="card-value" id="obras-count">0</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">⏱️ Horas</div>
+                        <div class="card-value" id="total-horas">0h</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">📈 Margem</div>
+                        <div class="card-value" id="margem">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CLIENTES -->
+            <div id="clientes" class="page">
+                <h1 class="page-title">👥 Clientes</h1>
+                <div class="form-container">
+                    <h3>Novo Cliente</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nome Completo *</label>
+                            <input type="text" id="cli-nome" placeholder="João da Silva">
+                        </div>
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" id="cli-email" placeholder="joao@email.com">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Telefone *</label>
+                            <input type="tel" id="cli-tel" placeholder="(85) 98765-4321">
+                        </div>
+                        <div class="form-group">
+                            <label>Cidade</label>
+                            <input type="text" id="cli-cidade" placeholder="Fortaleza">
+                        </div>
+                    </div>
+                    <button onclick="addCliente()">✅ Salvar Cliente</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Telefone</th>
+                                <th>Cidade</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientes-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ORÇAMENTOS -->
+            <div id="orcamentos" class="page">
+                <h1 class="page-title">📋 Orçamentos</h1>
+                <div class="form-container">
+                    <h3>Novo Orçamento</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Cliente *</label>
+                            <select id="orc-cliente">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Data *</label>
+                            <input type="date" id="orc-data">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Horas *</label>
+                            <input type="number" id="orc-horas" placeholder="10" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Margem % *</label>
+                            <input type="number" id="orc-margem" placeholder="30" min="0">
+                        </div>
+                    </div>
+                    <button onclick="addOrcamento()">Criar Orçamento</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Número</th>
+                                <th>Cliente</th>
+                                <th>Horas</th>
+                                <th>Valor</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orcamentos-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ORDEM DE SERVIÇO -->
+            <div id="ordens" class="page">
+                <h1 class="page-title">📄 Ordem de Serviço</h1>
+                <div class="form-container">
+                    <h3>Converter Orçamento em OS</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Orçamento *</label>
+                            <select id="os-orcamento">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Máquina *</label>
+                            <select id="os-maquina">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="addOS()">Criar OS</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Número</th>
+                                <th>Cliente</th>
+                                <th>Máquina</th>
+                                <th>Valor</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordens-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- AGENDA -->
+            <div id="agenda" class="page">
+                <h1 class="page-title">📅 Agenda</h1>
+                <div class="form-container">
+                    <h3>Agendar Obra</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>OS *</label>
+                            <select id="agenda-os">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Data Início *</label>
+                            <input type="date" id="agenda-inicio">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Local</label>
+                        <input type="text" id="agenda-local" placeholder="Endereço da obra">
+                    </div>
+                    <button onclick="addAgenda()">Agendar</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>OS</th>
+                                <th>Cliente</th>
+                                <th>Máquina</th>
+                                <th>Data</th>
+                                <th>Local</th>
+                            </tr>
+                        </thead>
+                        <tbody id="agenda-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- OBRAS -->
+            <div id="obras" class="page">
+                <h1 class="page-title">🏗️ Obras Realizadas</h1>
+                <div class="form-container">
+                    <h3>Registrar Obra</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Agenda *</label>
+                            <select id="obra-agenda">
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Data Execução *</label>
+                            <input type="date" id="obra-data">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Horas Executadas *</label>
+                            <input type="number" id="obra-horas" placeholder="9.5" step="0.5" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Valor Faturado *</label>
+                            <input type="number" id="obra-valor" placeholder="3640.00" step="0.01" min="0">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Diesel Consumido (L)</label>
+                        <input type="number" id="obra-diesel" placeholder="35" step="0.1" min="0">
+                    </div>
+                    <button onclick="addObra()">Registrar Obra</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Cliente</th>
+                                <th>Máquina</th>
+                                <th>Horas</th>
+                                <th>Faturado</th>
+                                <th>Lucro</th>
+                            </tr>
+                        </thead>
+                        <tbody id="obras-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- MÁQUINAS -->
+            <div id="maquinas" class="page">
+                <h1 class="page-title">🚜 Máquinas & GPS</h1>
+                <div class="form-container">
+                    <h3>Cadastro de Máquina</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nome da Máquina *</label>
+                            <input type="text" id="maq-nome" placeholder="Retro 1">
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo *</label>
+                            <select id="maq-tipo">
+                                <option value="">Selecione...</option>
+                                <option value="Retro">Retro</option>
+                                <option value="Caminhão Basculante">Caminhão Basculante</option>
+                                <option value="Motoniveladora">Motoniveladora</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Placa *</label>
+                            <input type="text" id="maq-placa" placeholder="ABC-1234">
+                        </div>
+                        <div class="form-group">
+                            <label>Valor Hora *</label>
+                            <input type="number" id="maq-valor" placeholder="280" step="0.01" min="0">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>GPS/Rastreador *</label>
+                            <input type="text" id="maq-gps" placeholder="Código do rastreador">
+                        </div>
+                        <div class="form-group">
+                            <label>Status *</label>
+                            <select id="maq-status">
+                                <option value="">Selecione...</option>
+                                <option value="Ativa">Ativa</option>
+                                <option value="Manutenção">Manutenção</option>
+                                <option value="Parada">Parada</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="addMaquina()">Cadastrar Máquina</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Tipo</th>
+                                <th>Placa</th>
+                                <th>Valor/Hora</th>
+                                <th>Status</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="maquinas-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ANÁLISE -->
+            <div id="analise" class="page">
+                <h1 class="page-title">📊 Análise por Máquina</h1>
+                <div id="analise-container">
+                    <div style="text-align: center; padding: 3rem; background: white; border-radius: 12px;">
+                        <p style="font-size: 1.2rem; color: #666;">📌 Abra <strong>TRATOO_ANALISE_MAQUINAS.html</strong> para ver análise detalhada de rentabilidade</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OPERADORES -->
+            <div id="operadores" class="page">
+                <h1 class="page-title">👷 Operadores</h1>
+                <div class="form-container">
+                    <h3>Novo Operador</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nome *</label>
+                            <input type="text" id="op-nome" placeholder="José">
+                        </div>
+                        <div class="form-group">
+                            <label>CPF</label>
+                            <input type="text" id="op-cpf" placeholder="123.456.789-00">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Função *</label>
+                            <select id="op-funcao">
+                                <option value="">Selecione...</option>
+                                <option value="Operador Retro">Operador Retro</option>
+                                <option value="Operador Caminhão">Operador Caminhão</option>
+                                <option value="Encarregado">Encarregado</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Salário *</label>
+                            <input type="number" id="op-salario" placeholder="4000" step="0.01" min="0">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Telefone *</label>
+                            <input type="tel" id="op-tel" placeholder="(85) 98765-4321">
+                        </div>
+                        <div class="form-group">
+                            <label>WhatsApp</label>
+                            <input type="tel" id="op-whats" placeholder="+5585987654321">
+                        </div>
+                    </div>
+                    <button onclick="addOperador()">Salvar Operador</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Função</th>
+                                <th>Salário</th>
+                                <th>Telefone</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="operadores-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CONTAS A RECEBER -->
+            <div id="receber" class="page">
+                <h1 class="page-title">💳 Contas a Receber</h1>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Valor</th>
+                                <th>Data</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="receber-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CONTAS A PAGAR -->
+            <div id="pagar" class="page">
+                <h1 class="page-title">💸 Contas a Pagar</h1>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                                <th>Data</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pagar-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DRE -->
+            <div id="dre" class="page">
+                <h1 class="page-title">📊 DRE</h1>
+                <div class="card-container">
+                    <div class="card">
+                        <div class="card-title">Faturamento</div>
+                        <div class="card-value" id="dre-faturamento">R$ 0,00</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Custos</div>
+                        <div class="card-value" id="dre-custos">R$ 0,00</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">LUCRO</div>
+                        <div class="card-value" id="dre-lucro" style="color: #28a745;">R$ 0,00</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Margem</div>
+                        <div class="card-value" id="dre-margem">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PRECO_HORA = 280;
+
+        let dados = {
+            clientes: [],
+            operadores: [],
+            maquinas: [],
+            orcamentos: [],
+            ordens: [],
+            agenda: [],
+            obras: [],
+            diesel: []
+        };
+
+        function carregarDados() {
+            const salvos = localStorage.getItem('tratoo_dados');
+            if (salvos) dados = JSON.parse(salvos);
+        }
+
+        function salvarDados() {
+            localStorage.setItem('tratoo_dados', JSON.stringify(dados));
+            atualizarDashboard();
+        }
+
+        function atualizarDataHora() {
+            const agora = new Date();
+            const dia = String(agora.getDate()).padStart(2, '0');
+            const mes = String(agora.getMonth() + 1).padStart(2, '0');
+            const ano = agora.getFullYear();
+            const horas = String(agora.getHours()).padStart(2, '0');
+            const minutos = String(agora.getMinutes()).padStart(2, '0');
+            const segundos = String(agora.getSeconds()).padStart(2, '0');
+
+            document.getElementById('date').textContent = `${dia}/${mes}/${ano}`;
+            document.getElementById('time').textContent = `${horas}:${minutos}:${segundos}`;
+        }
+        setInterval(atualizarDataHora, 1000);
+        atualizarDataHora();
+
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            document.getElementById(pageName).classList.add('active');
+            event.target.closest('.menu-item').classList.add('active');
+        }
+
+        function addCliente() {
+            const nome = document.getElementById('cli-nome').value;
+            if (!nome) { alert('Preencha o nome'); return; }
+
+            const agora = new Date();
+            const data = `${agora.getDate().toString().padStart(2, '0')}/${(agora.getMonth() + 1).toString().padStart(2, '0')}/${agora.getFullYear()}`;
+
+            dados.clientes.push({
+                id: Date.now(),
+                nome,
+                email: document.getElementById('cli-email').value,
+                telefone: document.getElementById('cli-tel').value,
+                cidade: document.getElementById('cli-cidade').value,
+                data_cadastro: data,
+                status: 'Ativo'
+            });
+
+            document.getElementById('cli-nome').value = '';
+            document.getElementById('cli-email').value = '';
+            document.getElementById('cli-tel').value = '';
+            document.getElementById('cli-cidade').value = '';
+
+            salvarDados();
+            atualizarClientes();
+        }
+
+        function atualizarClientes() {
+            const tbody = document.getElementById('clientes-tbody');
+            tbody.innerHTML = '';
+            dados.clientes.forEach(cli => {
+                tbody.innerHTML += `<tr><td>${cli.nome}</td><td>${cli.telefone || '-'}</td><td>${cli.cidade || '-'}</td><td>${cli.data_cadastro}</td></tr>`;
+            });
+
+            const select = document.getElementById('orc-cliente');
+            select.innerHTML = '<option value="">Selecione...</option>';
+            dados.clientes.forEach(cli => {
+                select.innerHTML += `<option value="${cli.id}">${cli.nome}</option>`;
+            });
+        }
+
+        function addOrcamento() {
+            const cliente_id = document.getElementById('orc-cliente').value;
+            const horas = parseFloat(document.getElementById('orc-horas').value);
+            const margem = parseFloat(document.getElementById('orc-margem').value);
+            const data = document.getElementById('orc-data').value;
+
+            if (!cliente_id || !horas || !margem || !data) { alert('Preencha campos obrigatórios'); return; }
+
+            const valor_total = horas * PRECO_HORA * (1 + margem / 100);
+            const cliente = dados.clientes.find(c => c.id == cliente_id);
+
+            dados.orcamentos.push({
+                id: Date.now(),
+                numero: 'ORC-' + Date.now(),
+                cliente_id,
+                cliente_nome: cliente.nome,
+                horas,
+                margem,
+                valor_total,
+                status: 'Enviado',
+                data_criacao: data
+            });
+
+            salvarDados();
+            atualizarOrcamentos();
+        }
+
+        function atualizarOrcamentos() {
+            const tbody = document.getElementById('orcamentos-tbody');
+            tbody.innerHTML = '';
+            dados.orcamentos.forEach(orc => {
+                tbody.innerHTML += `<tr><td><strong>${orc.numero}</strong></td><td>${orc.cliente_nome}</td><td>${orc.horas}h</td><td>R$ ${orc.valor_total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td><td>${orc.data_criacao}</td></tr>`;
+            });
+
+            const select = document.getElementById('os-orcamento');
+            select.innerHTML = '<option value="">Selecione...</option>';
+            dados.orcamentos.forEach(orc => {
+                select.innerHTML += `<option value="${orc.id}">${orc.numero} - ${orc.cliente_nome}</option>`;
+            });
+        }
+
+        function addMaquina() {
+            const nome = document.getElementById('maq-nome').value;
+            const tipo = document.getElementById('maq-tipo').value;
+            const placa = document.getElementById('maq-placa').value;
+            const valor = parseFloat(document.getElementById('maq-valor').value);
+            const gps = document.getElementById('maq-gps').value;
+            const status = document.getElementById('maq-status').value;
+
+            if (!nome || !tipo || !placa || !valor || !gps || !status) { alert('Preencha campos obrigatórios'); return; }
+
+            const agora = new Date();
+            const data = `${agora.getDate().toString().padStart(2, '0')}/${(agora.getMonth() + 1).toString().padStart(2, '0')}/${agora.getFullYear()}`;
+
+            dados.maquinas.push({ id: Date.now(), nome, tipo, placa, valor_hora: valor, gps, status, data_cadastro: data });
+            salvarDados();
+            atualizarMaquinas();
+        }
+
+        function atualizarMaquinas() {
+            const tbody = document.getElementById('maquinas-tbody');
+            tbody.innerHTML = '';
+            dados.maquinas.forEach(maq => {
+                tbody.innerHTML += `<tr><td><strong>${maq.nome}</strong></td><td>${maq.tipo}</td><td><span style="background: #FDB913; color: #1a1a1a; padding: 0.3rem 0.6rem; border-radius: 4px; font-weight: bold;">${maq.placa}</span></td><td>R$ ${maq.valor_hora.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td><td><span class="status ${maq.status === 'Ativa' ? 'ativo' : 'pendente'}">${maq.status}</span></td><td>${maq.data_cadastro}</td></tr>`;
+            });
+
+            const select = document.getElementById('os-maquina');
+            select.innerHTML = '<option value="">Selecione...</option>';
+            dados.maquinas.forEach(maq => {
+                select.innerHTML += `<option value="${maq.id}">${maq.nome} (${maq.placa})</option>`;
+            });
+        }
+
+        function addOS() {
+            const orc_id = document.getElementById('os-orcamento').value;
+            const maq_id = document.getElementById('os-maquina').value;
+
+            if (!orc_id || !maq_id) { alert('Preencha campos obrigatórios'); return; }
+
+            const orc = dados.orcamentos.find(o => o.id == orc_id);
+            const maq = dados.maquinas.find(m => m.id == maq_id);
+
+            dados.ordens.push({
+                id: Date.now(),
+                numero: 'OS-' + Date.now(),
+                orcamento_id: orc_id,
+                cliente_id: orc.cliente_id,
+                cliente_nome: orc.cliente_nome,
+                maquina_id: maq_id,
+                maquina_nome: maq.nome,
+                horas: orc.horas,
+                valor: orc.valor_total,
+                status: 'Criada',
+                data_criacao: new Date().toLocaleDateString('pt-BR')
+            });
+
+            orc.status = 'Convertida';
+            salvarDados();
+            atualizarOrdens();
+        }
+
+        function atualizarOrdens() {
+            const tbody = document.getElementById('ordens-tbody');
+            tbody.innerHTML = '';
+            dados.ordens.forEach(os => {
+                tbody.innerHTML += `<tr><td><strong>${os.numero}</strong></td><td>${os.cliente_nome}</td><td>${os.maquina_nome}</td><td>R$ ${os.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td><td>${os.data_criacao}</td></tr>`;
+            });
+
+            const select = document.getElementById('agenda-os');
+            select.innerHTML = '<option value="">Selecione...</option>';
+            dados.ordens.forEach(os => {
+                select.innerHTML += `<option value="${os.id}">${os.numero} - ${os.cliente_nome}</option>`;
+            });
+        }
+
+        function addAgenda() {
+            const os_id = document.getElementById('agenda-os').value;
+            const inicio = document.getElementById('agenda-inicio').value;
+
+            if (!os_id || !inicio) { alert('Preencha campos obrigatórios'); return; }
+
+            const os = dados.ordens.find(o => o.id == os_id);
+
+            dados.agenda.push({
+                id: Date.now(),
+                os_id,
+                os_numero: os.numero,
+                cliente_id: os.cliente_id,
+                cliente_nome: os.cliente_nome,
+                maquina_id: os.maquina_id,
+                maquina_nome: os.maquina_nome,
+                data_inicio: inicio,
+                local: document.getElementById('agenda-local').value,
+                status: 'Agendada'
+            });
+
+            salvarDados();
+            atualizarAgenda();
+        }
+
+        function atualizarAgenda() {
+            const tbody = document.getElementById('agenda-tbody');
+            tbody.innerHTML = '';
+            dados.agenda.forEach(ag => {
+                tbody.innerHTML += `<tr><td><strong>${ag.os_numero}</strong></td><td>${ag.cliente_nome}</td><td>${ag.maquina_nome}</td><td>${ag.data_inicio}</td><td>${ag.local || '-'}</td></tr>`;
+            });
+
+            const select = document.getElementById('obra-agenda');
+            select.innerHTML = '<option value="">Selecione...</option>';
+            dados.agenda.forEach(ag => {
+                select.innerHTML += `<option value="${ag.id}">${ag.os_numero} - ${ag.cliente_nome}</option>`;
+            });
+        }
+
+        function addObra() {
+            const agenda_id = document.getElementById('obra-agenda').value;
+            const horas = parseFloat(document.getElementById('obra-horas').value);
+            const valor = parseFloat(document.getElementById('obra-valor').value);
+            const data = document.getElementById('obra-data').value;
+            const diesel = parseFloat(document.getElementById('obra-diesel').value) || 0;
+
+            if (!agenda_id || !horas || !valor || !data) { alert('Preencha campos obrigatórios'); return; }
+
+            const agenda = dados.agenda.find(a => a.id == agenda_id);
+            const custos = diesel * 5.5;
+            const lucro = valor - custos;
+
+            dados.obras.push({
+                id: Date.now(),
+                agenda_id,
+                cliente_id: agenda.cliente_id,
+                cliente_nome: agenda.cliente_nome,
+                maquina_id: agenda.maquina_id,
+                maquina_nome: agenda.maquina_nome,
+                data: data,
+                horas,
+                diesel,
+                valor,
+                custos,
+                lucro
+            });
+
+            agenda.status = 'Concluída';
+            salvarDados();
+            atualizarObras();
+        }
+
+        function atualizarObras() {
+            const tbody = document.getElementById('obras-tbody');
+            tbody.innerHTML = '';
+            dados.obras.forEach(obra => {
+                const corLucro = obra.lucro >= 0 ? 'color: #28a745;' : 'color: #dc3545;';
+                tbody.innerHTML += `<tr><td>${obra.data}</td><td>${obra.cliente_nome}</td><td>${obra.maquina_nome}</td><td>${obra.horas.toFixed(1)}h</td><td>R$ ${obra.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td><td style="${corLucro}"><strong>R$ ${obra.lucro.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td></tr>`;
+            });
+        }
+
+        function addOperador() {
+            const nome = document.getElementById('op-nome').value;
+            const funcao = document.getElementById('op-funcao').value;
+            const salario = parseFloat(document.getElementById('op-salario').value);
+            const tel = document.getElementById('op-tel').value;
+
+            if (!nome || !funcao || !salario || !tel) { alert('Preencha campos obrigatórios'); return; }
+
+            const agora = new Date();
+            const data = `${agora.getDate().toString().padStart(2, '0')}/${(agora.getMonth() + 1).toString().padStart(2, '0')}/${agora.getFullYear()}`;
+
+            dados.operadores.push({ id: Date.now(), nome, funcao, salario, telefone: tel, whatsapp: document.getElementById('op-whats').value, data_cadastro: data, status: 'Ativo' });
+            salvarDados();
+            atualizarOperadores();
+        }
+
+        function atualizarOperadores() {
+            const tbody = document.getElementById('operadores-tbody');
+            tbody.innerHTML = '';
+            dados.operadores.forEach(op => {
+                tbody.innerHTML += `<tr><td><strong>${op.nome}</strong></td><td>${op.funcao}</td><td>R$ ${op.salario.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td><td>${op.telefone || '-'}</td><td>${op.data_cadastro}</td></tr>`;
+            });
+        }
+
+        function atualizarReceber() {
+            const tbody = document.getElementById('receber-tbody');
+            tbody.innerHTML = '';
+            dados.obras.forEach(obra => {
+                tbody.innerHTML += `<tr><td>${obra.cliente_nome}</td><td>R$ ${obra.valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td><td>${obra.data}</td><td><span class="status pendente">Pendente</span></td></tr>`;
+            });
+        }
+
+        function atualizarPagar() {
+            const tbody = document.getElementById('pagar-tbody');
+            tbody.innerHTML = '';
+            dados.obras.forEach(obra => {
+                if (obra.diesel > 0) {
+                    tbody.innerHTML += `<tr><td>Diesel - ${obra.maquina_nome}</td><td>R$ ${(obra.diesel * 5.5).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td><td>${obra.data}</td><td><span class="status pendente">Aberto</span></td></tr>`;
+                }
+            });
+        }
+
+        function atualizarDashboard() {
+            const faturamento = dados.obras.reduce((sum, o) => sum + o.valor, 0);
+            const custos = dados.obras.reduce((sum, o) => sum + o.custos, 0);
+            const lucro = faturamento - custos;
+            const horas_totais = dados.obras.reduce((sum, o) => sum + o.horas, 0);
+            const margem = faturamento > 0 ? ((lucro / faturamento) * 100).toFixed(1) : 0;
+
+            document.getElementById('faturamento').textContent = `R$ ${faturamento.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('custos').textContent = `R$ ${custos.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('lucro').textContent = `R$ ${lucro.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('obras-count').textContent = dados.obras.length;
+            document.getElementById('total-horas').textContent = horas_totais.toFixed(1) + 'h';
+            document.getElementById('margem').textContent = margem + '%';
+
+            document.getElementById('dre-faturamento').textContent = `R$ ${faturamento.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('dre-custos').textContent = `R$ ${custos.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('dre-lucro').textContent = `R$ ${lucro.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('dre-margem').textContent = margem + '%';
+
+            atualizarReceber();
+            atualizarPagar();
+        }
+
+        carregarDados();
+        atualizarClientes();
+        atualizarOrcamentos();
+        atualizarMaquinas();
+        atualizarOrdens();
+        atualizarAgenda();
+        atualizarObras();
+        atualizarOperadores();
+        atualizarDashboard();
+    </script>
+</body>
+</html>
