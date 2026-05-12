@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>TRATOO ERP</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;color:#333;font-size:14px}
+/* LOGIN */
+#tela-login{position:fixed;inset:0;background:linear-gradient(135deg,#1a1a1a,#2d2d2d);display:flex;align-items:center;justify-content:center;z-index:9999}
+.lbox{background:white;padding:2.5rem;border-radius:16px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.lbox h1{color:#FDB913;font-size:2rem;text-align:center;margin-bottom:.3rem}
+.lbox p{color:#888;text-align:center;font-size:.85rem;margin-bottom:2rem}
+.lbtn{width:100%;padding:.85rem;background:linear-gradient(90deg,#FDB913,#f0a000);color:#1a1a1a;border:none;border-radius:8px;font-weight:bold;font-size:1rem;cursor:pointer;margin-top:.5rem}
+.lerr{color:#dc3545;font-size:.85rem;text-align:center;margin-top:.5rem;display:none}
+/* APP */
+#app{display:none;flex-direction:column;min-height:100vh}
+.nav{background:linear-gradient(90deg,#1a1a1a,#2a2a2a);padding:.7rem 1.5rem;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #FDB913;position:sticky;top:0;z-index:100}
+.nav-t{color:#FDB913;font-size:1.5rem;font-weight:bold}
+.nav-r{display:flex;align-items:center;gap:1rem}
+.nav-u{color:#FDB913;font-size:.85rem}
+.nav-d{color:#aaa;font-size:.8rem}
+.btn-out{background:transparent;color:#aaa;border:1px solid #555;padding:.3rem .8rem;border-radius:4px;cursor:pointer;font-size:.8rem}
+.btn-out:hover{color:#FDB913;border-color:#FDB913}
+/* LAYOUT */
+.layout{display:flex;flex:1}
+.sidebar{background:#1a1a1a;width:240px;padding:1rem;overflow-y:auto;border-right:2px solid #2d2d2d;flex-shrink:0}
+.ms{margin-bottom:1.2rem}
+.mt{color:#FDB913;font-weight:bold;font-size:.72rem;text-transform:uppercase;padding:.5rem .6rem;border-left:3px solid #FDB913;margin-bottom:.4rem}
+.mi{color:#aaa;padding:.6rem .8rem;margin:.2rem 0;border-radius:5px;cursor:pointer;font-size:.88rem;transition:all .2s}
+.mi:hover,.mi.active{background:#FDB913;color:#1a1a1a;font-weight:600}
+.main{flex:1;padding:1.5rem;overflow-y:auto}
+.page{display:none}.page.active{display:block}
+.pt{font-size:1.6rem;font-weight:bold;border-bottom:4px solid #FDB913;padding-bottom:.7rem;margin-bottom:1.5rem;color:#1a1a1a}
+/* CARDS */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:1rem;margin-bottom:1.5rem}
+.card{background:white;padding:1.1rem;border-radius:10px;border-top:4px solid #FDB913;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.ct{color:#888;font-size:.72rem;font-weight:bold;text-transform:uppercase;margin-bottom:.4rem}
+.cv{color:#FDB913;font-size:1.5rem;font-weight:bold}
+/* FORMS */
+.box{background:white;padding:1.3rem;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:1.2rem;border-left:4px solid #FDB913}
+.box h3{font-size:.95rem;color:#1a1a1a;margin-bottom:1rem;border-left:3px solid #FDB913;padding-left:.6rem}
+.fg{margin-bottom:.9rem}
+.fg label{display:block;margin-bottom:.3rem;font-weight:600;font-size:.82rem;color:#444}
+.fg input,.fg select,.fg textarea{width:100%;padding:.6rem .7rem;border:2px solid #e8e8e8;border-radius:6px;font-family:inherit;font-size:.88rem}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:#FDB913}
+.fr{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem}
+/* BUTTONS */
+.btn{background:linear-gradient(90deg,#FDB913,#f0a000);color:#1a1a1a;border:none;padding:.65rem 1.4rem;border-radius:6px;cursor:pointer;font-weight:bold;font-size:.85rem;transition:all .2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(253,185,19,.3)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.bfull{width:100%;padding:.75rem}
+.bsm{padding:.35rem .75rem;font-size:.78rem;margin:.15rem}
+.bgr{background:linear-gradient(90deg,#28a745,#20c997);color:white}
+.brd{background:linear-gradient(90deg,#dc3545,#c82333);color:white}
+.bbl{background:linear-gradient(90deg,#0066cc,#0052a3);color:white}
+.bgy{background:linear-gradient(90deg,#6c757d,#545b62);color:white}
+.bwp{background:linear-gradient(90deg,#25d366,#128c7e);color:white}
+/* TABLE */
+.tbl{background:white;border-radius:10px;overflow-x:auto;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:1.2rem;border:1px solid #e8e8e8}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+th{background:linear-gradient(90deg,#1a1a1a,#2a2a2a);color:#FDB913;padding:.65rem .8rem;text-align:left;font-weight:bold;font-size:.78rem;text-transform:uppercase;white-space:nowrap}
+td{padding:.55rem .8rem;border-bottom:1px solid #f5f5f5;vertical-align:middle}
+tr:hover td{background:#fafafa}
+.er td{color:#aaa;text-align:center;padding:1.5rem;font-style:italic}
+/* BADGES */
+.badge{display:inline-block;padding:.2rem .5rem;border-radius:20px;font-size:.72rem;font-weight:bold;white-space:nowrap}
+.bw{background:#fff3cd;color:#856404}.bok{background:#d4edda;color:#155724}
+.bi{background:#d1ecf1;color:#0c5460}.bdg{background:#f8d7da;color:#721c24}
+.bpp{background:#e2d9f3;color:#6f42c1}
+/* MODAL */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;padding:1.5rem;overflow-y:auto}
+.modal.show{display:block}
+.mc{background:white;padding:1.8rem;border-radius:12px;max-width:680px;margin:1.5rem auto}
+.mclg{max-width:900px}
+.mc h3{font-size:1.1rem;margin-bottom:1rem;border-left:4px solid #FDB913;padding-left:.7rem}
+.brow{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}
+/* ALERTS */
+.al{padding:.8rem 1rem;border-radius:6px;margin-bottom:1rem;font-size:.85rem;border-left:4px solid}
+.aw{background:#fff3cd;color:#856404;border-color:#ffc107}
+.ai{background:#d1ecf1;color:#0c5460;border-color:#17a2b8}
+.aok{background:#d4edda;color:#155724;border-color:#28a745}
+/* RESUMO */
+.res{background:#f9f9f9;padding:1rem;border-radius:8px;border-left:4px solid #FDB913;margin-bottom:1.2rem}
+.rg{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.7rem;margin-top:.8rem}
+.ri{background:white;padding:.7rem;border-radius:6px;border-left:3px solid #FDB913}
+.ri strong{display:block;color:#888;font-size:.72rem;margin-bottom:.25rem}
+.ri span{display:block;font-weight:bold;font-size:1rem}
+/* CALENDAR */
+.chead{display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem}
+.cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem}
+.cwd{background:#1a1a1a;color:#FDB913;padding:.5rem;text-align:center;font-weight:bold;border-radius:4px;font-size:.78rem}
+.cday{background:#f9f9f9;padding:.5rem;border-radius:4px;min-height:60px;border:1px solid #e0e0e0;font-size:.78rem}
+.cday.om{color:#ccc}.cdn{font-weight:bold;color:#1a1a1a;font-size:.85rem}
+.cev{background:#FDB913;color:#1a1a1a;padding:.1rem .3rem;border-radius:3px;margin-top:.2rem;font-size:.7rem;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+/* SERVICE ROW */
+.srow{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:.6rem;align-items:end;padding:.7rem;background:#f9f9f9;border-radius:6px;margin-bottom:.5rem;border-left:3px solid #FDB913}
+@media(max-width:768px){.layout{flex-direction:column}.sidebar{width:100%}.fr{grid-template-columns:1fr}.srow{grid-template-columns:1fr}}
+@media print{.sidebar,.nav,.btn,.bsm,.brow,.no-print{display:none!important}.main{padding:0}.page{display:block!important}.tbl{box-shadow:none;border:1px solid #ddd}}
+</style>
+</head>
+<body>
+<div id="tela-login">
+<div class="lbox">
+  <h1>&#128998; TRATOO</h1>
+  <p>Sistema de Gestao Empresarial</p>
+  <div class="fg"><label>Usuario</label><input id="l-u" placeholder="admin" onkeydown="if(event.key==='Enter')login()"></div>
+  <div class="fg"><label>Senha</label><input id="l-s" type="password" placeholder="tratoo123" onkeydown="if(event.key==='Enter')login()"></div>
+  <button class="lbtn" onclick="login()">Entrar</button>
+  <div id="l-err" class="lerr">Usuario ou senha invalidos</div>
+  <p style="text-align:center;color:#ccc;font-size:.75rem;margin-top:1rem">Login: admin / tratoo123</p>
+</div>
+</div>
+<div id="app">
+<div class="nav">
+  <div class="nav-t">&#128998; TRATOO ERP</div>
+  <div class="nav-r">
+    <span class="nav-u" id="nav-u"></span>
+    <span class="nav-d" id="nav-d"></span>
+    <button class="btn-out" onclick="logout()">Sair</button>
+  </div>
+</div>
+<div class="layout">
+<div class="sidebar">
+  <div class="ms"><div class="mt">&#128202; Sistema</div><div class="mi active" onclick="sp('dash',this)">Dashboard</div></div>
+  <div class="ms"><div class="mt">&#128188; Comercial</div>
+    <div class="mi" onclick="sp('cli',this)">Clientes</div>
+    <div class="mi" onclick="sp('orc',this)">Orcamentos</div>
+    <div class="mi" onclick="sp('os',this)">Ordens de Servico</div>
+  </div>
+  <div class="ms"><div class="mt">&#127959; Operacional</div>
+    <div class="mi" onclick="sp('ag',this)">Agenda</div>
+    <div class="mi" onclick="sp('ob',this)">Obras</div>
+  </div>
+  <div class="ms"><div class="mt">&#127970; Patrimonio</div>
+    <div class="mi" onclick="sp('mq',this)">Maquinas</div>
+    <div class="mi" onclick="sp('op',this)">Operadores</div>
+  </div>
+  <div class="ms"><div class="mt">&#128203; Despesas</div>
+    <div class="mi" onclick="sp('fn',this)">Fornecedores</div>
+    <div class="mi" onclick="sp('ds',this)">Controle Diesel</div>
+    <div class="mi" onclick="sp('mn',this)">Manutencao</div>
+  </div>
+  <div class="ms"><div class="mt">&#128176; Financeiro</div>
+    <div class="mi" onclick="sp('rc',this)">A Receber</div>
+    <div class="mi" onclick="sp('pg',this)">A Pagar</div>
+    <div class="mi" onclick="sp('cx',this)">Fluxo de Caixa</div>
+  </div>
+  <div class="ms"><div class="mt">&#128200; Relatorios</div>
+    <div class="mi" onclick="sp('dre',this)">DRE</div>
+    <div class="mi" onclick="sp('soc',this)">Societario</div>
+    <div class="mi" onclick="sp('rel',this)">Relatorios</div>
+    <div class="mi" onclick="sp('usr',this)">Usuarios</div>
+  </div>
+</div>
+<div class="main">
+<div id="dash" class="page active">
+<div class="pt">Dashboard Geral</div>
+<div class="cards">
+  <div class="card"><div class="ct">Faturamento</div><div class="cv" id="d-ft">R$ 0,00</div></div>
+  <div class="card"><div class="ct">Lucro</div><div class="cv" style="color:#28a745" id="d-lc">R$ 0,00</div></div>
+  <div class="card"><div class="ct">Horas Trabalhadas</div><div class="cv" style="color:#0066cc" id="d-hr">0h</div></div>
+  <div class="card"><div class="ct">Obras Finalizadas</div><div class="cv" id="d-ob">0</div></div>
+  <div class="card"><div class="ct">OS Abertas</div><div class="cv" style="color:#0066cc" id="d-os">0</div></div>
+  <div class="card"><div class="ct">A Receber</div><div class="cv" style="color:#28a745" id="d-rc">R$ 0,00</div></div>
+  <div class="card"><div class="ct">A Pagar</div><div class="cv" style="color:#dc3545" id="d-pg">R$ 0,00</div></div>
+  <div class="card"><div class="ct">Saldo Caixa</div><div class="cv" style="color:#0066cc" id="d-cx">R$ 0,00</div></div>
+  <div class="card"><div class="ct">Diesel Consumido</div><div class="cv" id="d-ds">0L</div></div>
+  <div class="card"><div class="ct">Manut. Pendente</div><div class="cv" style="color:#dc3545" id="d-mn">0</div></div>
+</div>
+<div class="al ai"><strong>Banco de dados:</strong> Salvo automaticamente no navegador (localStorage). Para backup: Relatorios > Exportar JSON.</div>
+</div>
+<div id="cli" class="page">
+<div class="pt">Clientes</div>
+<div class="box"><h3>Novo Cliente</h3>
+  <div class="fr">
+    <div class="fg"><label>Nome *</label><input id="cl-n"></div>
+    <div class="fg"><label>WhatsApp *</label><input id="cl-t" placeholder="(14) 98765-4321"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>CPF</label><input id="cl-cpf" placeholder="000.000.000-00"></div>
+    <div class="fg"><label>CNPJ</label><input id="cl-cnpj" placeholder="00.000.000/0000-00"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>Email</label><input id="cl-e" type="email"></div>
+    <div class="fg"><label>Cidade</label><input id="cl-c"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>Endereco Obra</label><input id="cl-end"></div>
+    <div class="fg"><label>Origem Lead</label>
+      <select id="cl-or"><option value="">Selecione</option><option>Instagram</option><option>Indicacao</option><option>WhatsApp</option><option>Google</option><option>Anuncio</option><option>Outro</option></select>
+    </div>
+  </div>
+  <div class="fg"><label>Observacoes</label><textarea id="cl-obs" rows="2"></textarea></div>
+  <button class="btn bfull" onclick="addCli()">Cadastrar Cliente</button>
+</div>
+<div class="tbl"><table>
+  <thead><tr><th>Nome</th><th>CPF/CNPJ</th><th>WhatsApp</th><th>Cidade</th><th>Origem</th><th>Status</th><th>Acoes</th></tr></thead>
+  <tbody id="cl-tb"><tr class="er"><td colspan="7">Nenhum cliente</td></tr></tbody>
+</table></div>
+<!-- Modal Editar Cliente -->
+<div id="m-cl" class="modal"><div class="mc">
+  <h3>Editar Cliente</h3>
+  <div class="fr"><div class="fg"><label>Nome</label><input id="ecl-n"></div><div class="fg"><label>WhatsApp</label><input id="ecl-t"></div></div>
+  <div class="fr"><div class="fg"><label>CPF</label><input id="ecl-cpf"></div><div class="fg"><label>Email</label><input id="ecl-e" type="email"></div></div>
+  <div class="fr"><div class="fg"><label>Cidade</label><input id="ecl-c"></div><div class="fg"><label>Status</label>
+    <select id="ecl-st"><option>Novo Lead</option><option>Orcamento Enviado</option><option>Negociacao</option><option>Fechado</option><option>Perdido</option><option>Recorrente</option></select>
+  </div></div>
+  <div class="fg"><label>Observacoes</label><textarea id="ecl-obs" rows="2"></textarea></div>
+  <div class="brow">
+    <button class="btn bgr" onclick="savCli()">Salvar</button>
+    <button class="btn bgy" onclick="fm('m-cl')">Cancelar</button>
+  </div>
+</div></div>
+</div>
+<div id="orc" class="page">
+<div class="pt">Orcamentos</div>
+<div class="al ai">MARGEM: percentual de lucro interno (nao impresso). Custo total vs valor do orcamento mostra a margem real.</div>
+<div class="box"><h3>Novo Orcamento</h3>
+  <div class="fr">
+    <div class="fg"><label>Cliente *</label><select id="or-c"><option value="">Selecione</option></select></div>
+    <div class="fg"><label>Data *</label><input id="or-dt" type="date"></div>
+    <div class="fg"><label>Validade (dias)</label><input id="or-vl" type="number" value="15"></div>
+  </div>
+  <div class="fg"><label>Descricao Detalhada *</label><textarea id="or-desc" rows="3" placeholder="Descreva: area, tipo de solo, objetivo, localizacao..."></textarea></div>
+  <div class="fg"><label>Local da Obra</label><input id="or-loc"></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin:1rem 0 .5rem">
+    <strong style="font-size:.9rem">Servicos / Equipamentos</strong>
+    <button class="btn bsm bgr" onclick="addSR()">+ Servico</button>
+  </div>
+  <div id="or-sr"></div>
+  <div class="fr" style="margin-top:.8rem">
+    <div class="fg"><label>Condicao Pagamento</label><input id="or-cp" placeholder="30 dias, a vista..."></div>
+    <div class="fg"><label>Responsavel</label><input id="or-rp"></div>
+  </div>
+  <!-- CUSTOS INTERNOS -->
+  <div class="box" style="background:#fff8e1;border-color:#f39c12;margin-top:.8rem">
+    <h3 style="color:#d35400">Analise de Custos INTERNA (nao impresso)</h3>
+    <div class="fr">
+      <div class="fg"><label>Custo Maquina R$</label><input id="or-cm" type="number" value="0" step="0.01" oninput="calcOrc()"></div>
+      <div class="fg"><label>Custo Operador R$</label><input id="or-co" type="number" value="0" step="0.01" oninput="calcOrc()"></div>
+      <div class="fg"><label>Custo Diesel R$</label><input id="or-cd" type="number" value="0" step="0.01" oninput="calcOrc()"></div>
+      <div class="fg"><label>Depreciacao R$</label><input id="or-cdp" type="number" value="0" step="0.01" oninput="calcOrc()"></div>
+      <div class="fg"><label>Custo Visita R$</label><input id="or-cv" type="number" value="0" step="0.01" oninput="calcOrc()"></div>
+      <div class="fg"><label>Outros Custos R$</label><input id="or-cx" type="number" value="0" step="0.01" oninput="calcOrc()"></div>
+    </div>
+    <div style="background:white;padding:.7rem;border-radius:6px;margin-top:.5rem;font-size:.9rem">
+      <strong>Custo Total: </strong><span id="or-ct" style="color:#dc3545">R$ 0,00</span> &nbsp;
+      <strong>Valor Orc.: </strong><span id="or-vt" style="color:#28a745">R$ 0,00</span> &nbsp;
+      <strong>Margem Real: </strong><span id="or-mr" style="color:#0066cc">0%</span>
+    </div>
+  </div>
+  <button class="btn bfull" onclick="addOrc()" style="margin-top:.8rem">Gerar Orcamento</button>
+</div>
+<div class="tbl"><table>
+  <thead><tr><th>N</th><th>Data</th><th>Cliente</th><th>Servico</th><th>Valor</th><th>Validade</th><th>Status</th><th>Acoes</th></tr></thead>
+  <tbody id="or-tb"><tr class="er"><td colspan="8">Nenhum orcamento</td></tr></tbody>
+</table></div>
+<!-- Modal Ver Orc -->
+<div id="m-or" class="modal"><div class="mc mclg">
+  <h3 id="m-or-t">Orcamento</h3>
+  <div id="m-or-b"></div>
+  <div class="brow">
+    <button class="btn bbl" onclick="impOrc()">Imprimir</button>
+    <button class="btn bwp" onclick="waOrc()">WhatsApp Cliente</button>
+    <button class="btn bgy" onclick="fm('m-or')">Fechar</button>
+  </div>
+</div></div>
+</div>
+<div id="os" class="page">
+<div class="pt">Ordens de Servico</div>
+<div class="box"><h3>Criar OS</h3>
+  <div class="fr">
+    <div class="fg"><label>Orcamento *</label><select id="os-oc"><option value="">Selecione</option></select></div>
+    <div class="fg"><label>Operador *</label><select id="os-op"><option value="">Selecione</option></select></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>Data/Hora Inicio *</label><input id="os-di" type="datetime-local"></div>
+    <div class="fg"><label>Data/Hora Fim Previsto</label><input id="os-df" type="datetime-local"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>Local</label><input id="os-lc"></div>
+    <div class="fg"><label>Observacoes</label><input id="os-ob"></div>
+  </div>
+  <div class="al aw">OS com mais de 7 dias deve ser fechada e nova aberta.</div>
+  <button class="btn bfull" onclick="addOS()">Criar OS</button>
+</div>
+<div class="tbl"><table>
+  <thead><tr><th>N OS</th><th>Cliente</th><th>Operador</th><th>Inicio</th><th>Fim Prev.</th><th>Maquinas</th><th>Valor</th><th>Status</th><th>Acoes</th></tr></thead>
+  <tbody id="os-tb"><tr class="er"><td colspan="9">Nenhuma OS</td></tr></tbody>
+</table></div>
+<!-- Modal OS -->
+<div id="m-os" class="modal"><div class="mc mclg">
+  <h3 id="m-os-t">Ordem de Servico</h3>
+  <div id="m-os-b"></div>
+  <div class="brow">
+    <button class="btn bbl" onclick="impOS()">Imprimir OS</button>
+    <button class="btn bwp" onclick="waOSC()">WhatsApp Cliente</button>
+    <button class="btn bwp" onclick="waOSO()">WhatsApp Operador</button>
+    <button class="btn bgy" onclick="fm('m-os')">Fechar</button>
+  </div>
+</div></div>
+</div>
+<div id="ag" class="page">
+<div class="pt">Agenda Operacional</div>
+<div class="box">
+  <div class="chead">
+    <button class="btn bsm bgy" onclick="navCal(-1)">Anterior</button>
+    <strong id="cal-t" style="font-size:1.1rem"></strong>
+    <button class="btn bsm bgy" onclick="navCal(1)">Proximo</button>
+  </div>
+  <div id="cal-b"></div>
+</div>
+<div class="tbl"><table>
+  <thead><tr><th>Data</th><th>N OS</th><th>Cliente</th><th>Operador</th><th>Maquinas</th><th>Local</th><th>Status</th></tr></thead>
+  <tbody id="ag-tb"></tbody>
+</table></div>
+</div>
+<div id="ob" class="page">
+<div class="pt">Finalizar Obras</div>
+<div class="al aw">Ao finalizar: gera Contas a Receber (cliente) e Contas a Pagar (operador). Ponto do operador atualizado automaticamente.</div>
+<div class="box"><h3>Registrar Execucao</h3>
+  <div class="fr">
+    <div class="fg"><label>OS *</label><select id="ob-os"><option value="">Selecione</option></select></div>
+    <div class="fg"><label>Data Conclusao *</label><input id="ob-dt" type="date"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>H. Percurso IDA</label><input id="ob-id" type="number" value="0" min="0" step="0.5"></div>
+    <div class="fg"><label>H. Percurso VOLTA</label><input id="ob-vt" type="number" value="0" min="0" step="0.5"></div>
+    <div class="fg"><label>Horas Trabalhadas *</label><input id="ob-ht" type="number" value="0" min="0" step="0.5"></div>
+    <div class="fg"><label>Viagens Caminhao</label><input id="ob-vg" type="number" value="0" min="0" step="1"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>Diesel Consumido (L)</label><input id="ob-ds" type="number" value="0" min="0" step="0.1"></div>
+    <div class="fg"><label>Preco Litro Diesel R$</label><input id="ob-pd" type="number" value="5.50" min="0" step="0.01"></div>
+  </div>
+  <div class="fg"><label>Observacoes</label><textarea id="ob-obs" rows="2"></textarea></div>
+  <button class="btn bfull bgr" onclick="finObra()">FINALIZAR OBRA</button>
+</div>
+<div class="tbl"><table>
+  <thead><tr><th>Data</th><th>OS</th><th>Cliente</th><th>Operador</th><th>H.IDA</th><th>H.VOLTA</th><th>H.TRAB</th><th>Viag</th><th>Diesel</th><th>Valor</th></tr></thead>
+  <tbody id="ob-tb"><tr class="er"><td colspan="10">Nenhuma obra</td></tr></tbody>
+</table></div>
+</div>
+<div id="mq" class="page">
+<div class="pt">Maquinas - Patrimonio</div>
+<div class="box"><h3>Cadastrar Maquina</h3>
+  <div class="fr">
+    <div class="fg"><label>Nome *</label><input id="mq-n"></div>
+    <div class="fg"><label>Tipo *</label>
+      <select id="mq-t"><option value="">Selecione</option><option>Retro Escavadeira</option><option>Caminhao Basculante</option><option>Caminhonete D20</option><option>Motoniveladora</option><option>Compactador</option><option>Outro</option></select>
+    </div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>Placa (opcional)</label><input id="mq-p"></div>
+    <div class="fg"><label>Valor/Hora R$ *</label><input id="mq-v" type="number" step="0.01"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>Valor Aquisicao R$</label><input id="mq-aq" type="number" value="0" step="0.01"></div>
+    <div class="fg"><label>Depreciacao/Hora R$</label><input id="mq-dp" type="number" value="0" step="0.01"></div>
+    <div class="fg"><label>Consumo L/h</label><input id="mq-cs" type="number" value="0" step="0.1"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>GPS/Rastreador</label><input id="mq-gp"></div>
+    <div class="fg"><label>Status *</label>
+      <select id="mq-s"><option value="">Selecione</option><option>Ativa</option><option>Manutencao</option><option>Parada</option></select>
+    </div>
+  </div>
+  <button class="btn bfull" onclick="addMaq()">Cadastrar Maquina</button>
+</div>
+<div class="tbl"><table>
+  <thead><tr><th>Nome</th><th>Tipo</th><th>Placa</th><th>Valor/h</th><th>Dep./h</th><th>Cons.</th><th>GPS</th><th>Status</th><th>Acoes</th></tr></thead>
+  <tbody id="mq-tb"><tr class="er"><td colspan="9">Nenhuma maquina</td></tr></tbody>
+</table></div>
+<!-- Modal Historico -->
+<div id="m-mq" class="modal"><div class="mc mclg">
+  <h3 id="m-mq-t">Historico da Maquina</h3>
+  <div id="m-mq-b"></div>
+  <div class="brow"><button class="btn bgy" onclick="fm('m-mq')">Fechar</button></div>
+</div></div>
+</div>
+<div id="op" class="page">
+<div class="pt">Operadores</div>
+<div class="box"><h3>Cadastrar Operador</h3>
+  <div class="fr">
+    <div class="fg"><label>Nome *</label><input id="op-n"></div>
+    <div class="fg"><label>CPF *</label><input id="op-cpf" placeholder="000.000.000-00"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>Funcao *</label>
+      <select id="op-f"><option value="">Selecione</option><option>Operador Retro</option><option>Motorista</option><option>Encarregado</option><option>Ajudante</option></select>
+    </div>
+    <div class="fg"><label>Tipo Pagamento *</label>
+      <select id="op-t"><option value="">Selecione</option><option value="Hora">Por Hora</option><option value="Diaria">Diaria</option><option value="Empreita">Empreita</option><option value="Mensal">Mensal</option></select>
+    </div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>Valor R$ *</label><input id="op-v" type="number" step="0.01"></div>
+    <div class="fg"><label>Forma Pagamento</label>
+      <select id="op-fp"><option value="">Selecione</option><option>PIX</option><option>Transferencia</option><option>Dinheiro</option><option>Cheque</option></select>
+    </div>
+    <div class="fg"><label>WhatsApp</label><input id="op-w" placeholder="(14) 98765-4321"></div>
+  </div>
+  <button class="btn bfull" onclick="addOp()">Cadastrar Operador</button>
+</div>
+<div class="tbl"><table>
+  <thead><tr><th>Nome</th><th>CPF</th><th>Funcao</th><th>Tipo</th><th>Valor</th><th>F.Pagamento</th><th>WhatsApp</th><th>Acoes</th></tr></thead>
+  <tbody id="op-tb"><tr class="er"><td colspan="8">Nenhum operador</td></tr></tbody>
+</table></div>
+<!-- Modal Ponto -->
+<div id="m-pt" class="modal"><div class="mc mclg">
+  <h3 id="m-pt-t">Cartao de Ponto</h3>
+  <div id="m-pt-b"></div>
+  <div class="brow"><button class="btn bbl" onclick="impPonto()">Imprimir</button><button class="btn bgy" onclick="fm('m-pt')">Fechar</button></div>
+</div></div>
+</div>
+<div id="fn" class="page">
+<div class="pt">Fornecedores</div>
+<div class="box"><h3>Novo Fornecedor</h3>
+  <div class="fr">
+    <div class="fg"><label>Nome *</label><input id="fn-n"></div>
+    <div class="fg"><label>CNPJ</label><input id="fn-cnpj" placeholder="00.000.000/0000-00"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>Categoria *</label>
+      <select id="fn-c"><option value="">Selecione</option><option>Combustivel</option><option>Manutencao</option><option>Pecas</option><option>Alimentacao</option><option>Servicos</option><option>Outro</option></select>
+    </div>
+    <div class="fg"><label>Telefone</label><input id="fn-t"></div>
+  </div>
+  <button class="btn bfull" onclick="addForn()">Cadastrar</button>
+</div>
+<div class="tbl"><table>
+  <thead><tr><th>Nome</th><th>CNPJ</th><th>Categoria</th><th>Telefone</th><th>Acoes</th></tr></thead>
+  <tbody id="fn-tb"><tr class="er"><td colspan="5">Nenhum fornecedor</td></tr></tbody>
+</table></div>
+</div>
+<div id="ds" class="page">
+<div class="pt">Controle de Diesel</div>
+<div class="box"><h3>Registrar Abastecimento</h3>
+  <div class="fr">
+    <div class="fg"><label>Equipamento *</label><select id="ds-mq"><option value="">Selecione</option></select></div>
+    <div class="fg"><label>Data *</label><input id="ds-dt" type="date"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>Litros *</label><input id="ds-l" type="number" step="0.1"></div>
+    <div class="fg"><label>Valor Total R$ *</label><input id="ds-v" type="number" step="0.01"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>Posto/Fornecedor</label><select id="ds-p"><option value="">Selecione</option></select></div>
+    <div class="fg"><label>KM / Horimetro</label><input id="ds-km" type="number"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>OS Vinculada</label><select id="ds-os"><option value="">Nenhuma</option></select></div>
+    <div class="fg"><label>Operador</label><select id="ds-op"><option value="">Selecione</option></select></div>
+  </div>
+  <button class="btn bfull" onclick="addDs()">Registrar Abastecimento</button>
+</div>
+<div class="res"><strong>Resumo:</strong><div class="rg">
+  <div class="ri"><strong>Total Litros</strong><span id="ds-tl">0L</span></div>
+  <div class="ri"><strong>Total Gasto</strong><span id="ds-tv">R$ 0,00</span></div>
+  <div class="ri"><strong>Preco Medio/L</strong><span id="ds-pm">R$ 0,00</span></div>
+</div></div>
+<div class="tbl"><table>
+  <thead><tr><th>Data</th><th>Equipamento</th><th>Posto</th><th>Operador</th><th>OS</th><th>Litros</th><th>Valor</th><th>KM/Hr</th></tr></thead>
+  <tbody id="ds-tb"><tr class="er"><td colspan="8">Nenhum registro</td></tr></tbody>
+</table></div>
+</div>
+<div id="mn" class="page">
+<div class="pt">Controle de Manutencao</div>
+<div class="box"><h3>Registrar Manutencao</h3>
+  <div class="fr">
+    <div class="fg"><label>Equipamento *</label><select id="mn-mq"><option value="">Selecione</option></select></div>
+    <div class="fg"><label>Data *</label><input id="mn-dt" type="date"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>Tipo *</label>
+      <select id="mn-tp"><option value="">Selecione</option><option>Preventiva</option><option>Corretiva</option><option>Troca de Peca</option><option>Revisao Geral</option></select>
+    </div>
+    <div class="fg"><label>Oficina/Fornecedor</label><select id="mn-fn"><option value="">Selecione</option></select></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>KM/Horimetro</label><input id="mn-km" type="number"></div>
+    <div class="fg"><label>Proxima Revisao KM/Hr</label><input id="mn-px" type="number"></div>
+  </div>
+  <div class="fg"><label>Servico / Pecas Trocadas *</label><textarea id="mn-desc" rows="2" placeholder="Filtro de oleo, correia, pneu..."></textarea></div>
+  <div class="fr">
+    <div class="fg"><label>Custo R$ *</label><input id="mn-cs" type="number" step="0.01"></div>
+    <div class="fg"><label>Garantia (meses)</label><input id="mn-gr" type="number"></div>
+    <div class="fg"><label>N Nota Fiscal</label><input id="mn-nf"></div>
+    <div class="fg"><label>Tempo Parado (dias)</label><input id="mn-pd" type="number" value="0"></div>
+  </div>
+  <button class="btn bfull" onclick="addMn()">Registrar Manutencao</button>
+</div>
+<div class="tbl"><table>
+  <thead><tr><th>Data</th><th>Equip.</th><th>Tipo</th><th>Servico</th><th>Custo</th><th>Prox.Rev.</th><th>Garantia</th><th>NF</th></tr></thead>
+  <tbody id="mn-tb"><tr class="er"><td colspan="8">Nenhuma manutencao</td></tr></tbody>
+</table></div>
+</div>
+<div id="rc" class="page">
+<div class="pt">Contas a Receber</div>
+<div class="res"><strong>Resumo:</strong><div class="rg">
+  <div class="ri"><strong>Total</strong><span id="rc-tt">R$ 0,00</span></div>
+  <div class="ri"><strong>Pendente</strong><span id="rc-pd" style="color:#856404">R$ 0,00</span></div>
+  <div class="ri"><strong>Recebido</strong><span id="rc-rc" style="color:#155724">R$ 0,00</span></div>
+  <div class="ri"><strong>Vencido</strong><span id="rc-vc" style="color:#dc3545">R$ 0,00</span></div>
+  <div class="ri"><strong>Taxa Recebimento</strong><span id="rc-tx" style="color:#0066cc">0%</span></div>
+</div></div>
+<div class="tbl"><table>
+  <thead><tr><th>Emissao</th><th>Vencimento</th><th>Cliente</th><th>OS/Servico</th><th>Valor</th><th>Forma Esp.</th><th>Status</th><th>Dt.Receb.</th><th>Forma Rec.</th><th>Acoes</th></tr></thead>
+  <tbody id="rc-tb"><tr class="er"><td colspan="10">Nenhuma conta a receber</td></tr></tbody>
+</table></div>
+<!-- Modal Baixa -->
+<div id="m-rc" class="modal"><div class="mc">
+  <h3>Registrar Recebimento</h3>
+  <div class="fr">
+    <div class="fg"><label>Forma *</label>
+      <select id="mr-f"><option value="">Selecione</option><option>PIX</option><option>Boleto</option><option>Cartao Debito</option><option>Cartao Credito</option><option>Cheque</option><option>Dinheiro</option><option>Transferencia</option></select>
+    </div>
+    <div class="fg"><label>Data *</label><input id="mr-dt" type="date"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>Valor *</label><input id="mr-v" type="number" min="0" step="0.01"></div>
+    <div class="fg"><label>N Nota Fiscal</label><input id="mr-nf"></div>
+  </div>
+  <div class="fg"><label>Observacoes</label><textarea id="mr-obs" rows="2"></textarea></div>
+  <div class="brow">
+    <button class="btn bgr" onclick="savRec()">Registrar</button>
+    <button class="btn bgy" onclick="fm('m-rc')">Cancelar</button>
+  </div>
+</div></div>
+</div>
+<div id="pg" class="page">
+<div class="pt">Contas a Pagar</div>
+<div class="al aw">Contas VENCIDAS aparecem em vermelho. Clique em editar para alterar ou dar baixa.</div>
+<div class="box"><h3>Lancar Conta a Pagar</h3>
+  <div class="fr">
+    <div class="fg"><label>Beneficiario *</label><input id="pg-b"></div>
+    <div class="fg"><label>Descricao *</label><input id="pg-d"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>Categoria *</label>
+      <select id="pg-c"><option value="">Selecione</option><option>Diesel/Combustivel</option><option>Salario Operador</option><option>Manutencao Maquina</option><option>Pecas e Equipamentos</option><option>Alimentacao</option><option>Seguro</option><option>Financiamento</option><option>IPVA/Licenciamento</option><option>Marketing</option><option>Internet/Telefone</option><option>Impostos</option><option>Aluguel</option><option>Outros Fixos</option><option>Outros Variaveis</option></select>
+    </div>
+    <div class="fg"><label>Tipo</label>
+      <select id="pg-tp"><option value="Variavel">Variavel</option><option value="Fixo">Fixo Mensal</option></select>
+    </div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>Valor R$ *</label><input id="pg-v" type="number" min="0" step="0.01"></div>
+    <div class="fg"><label>Vencimento *</label><input id="pg-vc" type="date"></div>
+    <div class="fg"><label>Prioridade</label>
+      <select id="pg-pr"><option>Normal</option><option>Alta</option><option>Urgente</option></select>
+    </div>
+  </div>
+  <button class="btn bfull" onclick="addPg()">Lancar Conta</button>
+</div>
+<div class="res"><strong>Resumo:</strong><div class="rg">
+  <div class="ri"><strong>Total</strong><span id="pg-tt">R$ 0,00</span></div>
+  <div class="ri"><strong>Aberto</strong><span id="pg-ab" style="color:#856404">R$ 0,00</span></div>
+  <div class="ri"><strong>Pago</strong><span id="pg-pg" style="color:#155724">R$ 0,00</span></div>
+  <div class="ri"><strong>Vencidos</strong><span id="pg-vc2" style="color:#dc3545">R$ 0,00</span></div>
+</div></div>
+<div class="tbl"><table>
+  <thead><tr><th>Beneficiario</th><th>Descricao</th><th>Categoria</th><th>Valor</th><th>Vencimento</th><th>Tipo</th><th>Prio.</th><th>Status</th><th>Acoes</th></tr></thead>
+  <tbody id="pg-tb"><tr class="er"><td colspan="9">Nenhuma conta</td></tr></tbody>
+</table></div>
+<!-- Modal Editar -->
+<div id="m-pg" class="modal"><div class="mc">
+  <h3>Editar / Dar Baixa</h3>
+  <div class="fr"><div class="fg"><label>Beneficiario</label><input id="ep-b"></div><div class="fg"><label>Descricao</label><input id="ep-d"></div></div>
+  <div class="fr"><div class="fg"><label>Valor</label><input id="ep-v" type="number" min="0" step="0.01"></div><div class="fg"><label>Vencimento</label><input id="ep-vc" type="date"></div></div>
+  <div style="background:#f0fff0;padding:1rem;border-radius:6px;margin:.7rem 0;border-left:3px solid #28a745">
+    <strong>Dar Baixa:</strong>
+    <div class="fr" style="margin-top:.7rem">
+      <div class="fg"><label>Forma Pagamento</label>
+        <select id="ep-f"><option value="">Selecione</option><option>PIX</option><option>TED</option><option>Boleto</option><option>Cartao</option><option>Cheque</option><option>Dinheiro</option></select>
+      </div>
+      <div class="fg"><label>Data Pagamento</label><input id="ep-dt" type="date"></div>
+    </div>
+  </div>
+  <div class="brow">
+    <button class="btn bgr" onclick="savPg()">Salvar</button>
+    <button class="btn brd" onclick="baixaPg()">Dar Baixa</button>
+    <button class="btn bgy" onclick="fm('m-pg')">Cancelar</button>
+  </div>
+</div></div>
+</div>
+<div id="cx" class="page">
+<div class="pt">Fluxo de Caixa</div>
+<div class="res"><strong>Saldo por Forma:</strong><div class="rg">
+  <div class="ri"><strong>PIX</strong><span id="cx-px" style="color:#0066cc">R$ 0,00</span></div>
+  <div class="ri"><strong>Boleto</strong><span id="cx-bl" style="color:#ff9800">R$ 0,00</span></div>
+  <div class="ri"><strong>Cartao</strong><span id="cx-cr" style="color:#9c27b0">R$ 0,00</span></div>
+  <div class="ri"><strong>Cheque</strong><span id="cx-ch" style="color:#673ab7">R$ 0,00</span></div>
+  <div class="ri"><strong>Dinheiro</strong><span id="cx-dn" style="color:#4caf50">R$ 0,00</span></div>
+  <div class="ri" style="border-color:#FDB913"><strong>TOTAL CAIXA</strong><span id="cx-tt" style="color:#FDB913;font-size:1.2rem">R$ 0,00</span></div>
+</div></div>
+<div class="tbl"><table>
+  <thead><tr><th>Data</th><th>Tipo</th><th>Descricao</th><th>Forma</th><th>Entrada</th><th>Saida</th><th>Saldo</th></tr></thead>
+  <tbody id="cx-tb"><tr class="er"><td colspan="7">Nenhum lancamento</td></tr></tbody>
+</table></div>
+</div>
+<div id="dre" class="page">
+<div class="pt">DRE - Resultado</div>
+<div class="cards">
+  <div class="card"><div class="ct">Receitas Recebidas</div><div class="cv" style="color:#28a745" id="dr-r">R$ 0,00</div></div>
+  <div class="card"><div class="ct">Despesas Pagas</div><div class="cv" style="color:#dc3545" id="dr-d">R$ 0,00</div></div>
+  <div class="card"><div class="ct">Lucro Operacional</div><div class="cv" style="color:#0066cc" id="dr-l">R$ 0,00</div></div>
+  <div class="card"><div class="ct">Margem</div><div class="cv" id="dr-m">0%</div></div>
+</div>
+<div class="tbl"><table>
+  <thead><tr><th>Descricao</th><th>Valor</th></tr></thead>
+  <tbody id="dr-tb"></tbody>
+</table></div>
+</div>
+<div id="soc" class="page">
+<div class="pt">Dashboard Societario</div>
+<div class="box"><h3>Configuracao do Modelo</h3>
+  <div class="fr">
+    <div class="fg"><label>Modelo</label>
+      <select id="sc-m" onchange="renderSoc()"><option value="7030">70/30 (Operacao/Administracao)</option><option value="pl">Pro-Labore + Locacao</option></select>
+    </div>
+    <div class="fg"><label>Faturamento Base R$</label><input id="sc-ft" type="number" value="0" oninput="renderSoc()"></div>
+  </div>
+  <div id="sc-pl" style="display:none"><div class="fr">
+    <div class="fg"><label>Pro-Labore Mensal R$</label><input id="sc-p" type="number" value="0" oninput="renderSoc()"></div>
+    <div class="fg"><label>Locacao Equipamento/Mes R$</label><input id="sc-l" type="number" value="0" oninput="renderSoc()"></div>
+  </div></div>
+  <div class="fg"><label>Total Despesas R$</label><input id="sc-dp" type="number" value="0" oninput="renderSoc()"></div>
+</div>
+<div id="sc-res"></div>
+</div>
+<div id="rel" class="page">
+<div class="pt">Relatorios</div>
+<div class="box"><h3>Gerar Relatorio</h3>
+  <div class="fr">
+    <div class="fg"><label>Tipo</label>
+      <select id="rl-tp"><option value="obras">Obras Realizadas</option><option value="rc">Contas a Receber</option><option value="pg">Contas a Pagar</option><option value="cx">Fluxo de Caixa</option><option value="ds">Diesel</option><option value="mn">Manutencoes</option><option value="cli">Clientes</option></select>
+    </div>
+    <div class="fg"><label>Data Inicio</label><input id="rl-di" type="date"></div>
+    <div class="fg"><label>Data Fim</label><input id="rl-df" type="date"></div>
+  </div>
+  <div class="brow">
+    <button class="btn" onclick="gerarRel()">Gerar</button>
+    <button class="btn bbl" onclick="impRel()">Imprimir</button>
+    <button class="btn bgr" onclick="expDados()">Exportar JSON (Backup)</button>
+  </div>
+</div>
+<div id="rl-area"></div>
+</div>
+<div id="usr" class="page">
+<div class="pt">Usuarios do Sistema</div>
+<div class="box"><h3>Novo Usuario</h3>
+  <div class="fr">
+    <div class="fg"><label>Nome *</label><input id="us-n"></div>
+    <div class="fg"><label>Usuario (login) *</label><input id="us-u"></div>
+  </div>
+  <div class="fr">
+    <div class="fg"><label>Senha *</label><input id="us-s" type="password"></div>
+    <div class="fg"><label>Perfil</label>
+      <select id="us-p"><option value="admin">Administrador</option><option value="operacional">Operacional</option><option value="financeiro">Financeiro</option></select>
+    </div>
+  </div>
+  <button class="btn bfull" onclick="addUsr()">Criar Usuario</button>
+</div>
+<div class="tbl"><table>
+  <thead><tr><th>Nome</th><th>Usuario</th><th>Perfil</th><th>Acoes</th></tr></thead>
+  <tbody id="us-tb"></tbody>
+</table></div>
+</div>
+</div></div></div>
+<script>
+// ===== STATE =====
+let D={
+  usuarios:[{id:1,nome:"Administrador",user:"admin",senha:"tratoo123",perfil:"admin"}],
+  clientes:[],orcamentos:[],ordens:[],obras:[],maquinas:[],operadores:[],
+  fornecedores:[],diesel:[],manutencao:[],receber:[],pagar:[],caixa:[]
+};
+let _id=null,_orcId=null,_osId=null,SR=[],calM=new Date();
+
+function load(){const s=localStorage.getItem("tratoo");if(s)try{D=JSON.parse(s)}catch(e){}}
+function save(){localStorage.setItem("tratoo",JSON.stringify(D));upAll()}
+function R(n){return"R$ "+Number(n||0).toLocaleString("pt-BR",{minimumFractionDigits:2})}
+function hoje(){return new Date().toISOString().split("T")[0]}
+function fDt(d){if(!d)return"-";const p=String(d).split("T")[0].split("-");return p.length===3?p[2]+"/"+p[1]+"/"+p[0]:d}
+function fDtH(d){if(!d)return"-";const p=d.split("T");return fDt(p[0])+(p[1]?" "+p[1].substring(0,5):"")}
+function fm(id){document.getElementById(id).classList.remove("show")}
+function om(id){document.getElementById(id).classList.add("show")}
+function gv(id){return(document.getElementById(id)||{}).value||""}
+function sv(id,v){const e=document.getElementById(id);if(e)e.value=v}
+function clrAll(ids){ids.forEach(id=>sv(id,""))}
+
+function sp(pg,el){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".mi").forEach(m=>m.classList.remove("active"));
+  const e=document.getElementById(pg);if(e)e.classList.add("active");
+  if(el)el.classList.add("active");
+  if(pg==="ag")renderCal();
+  if(pg==="dre")renderDRE();
+  if(pg==="soc")renderSoc();
+  if(pg==="cx")renderCx();
+  if(pg==="ds")renderDs();
+}
+
+// RELÓGIO
+setInterval(()=>{
+  const n=new Date(),e=document.getElementById("nav-d");
+  if(e)e.textContent=String(n.getDate()).padStart(2,"0")+"/"+String(n.getMonth()+1).padStart(2,"0")+"/"+n.getFullYear()+" "+String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0")+":"+String(n.getSeconds()).padStart(2,"0");
+},1000);
+
+// ===== LOGIN =====
+function login(){
+  const u=gv("l-u"),s=gv("l-s");
+  const usr=D.usuarios.find(x=>x.user===u&&x.senha===s);
+  if(usr){
+    document.getElementById("l-err").style.display="none";
+    sessionStorage.setItem("ts",JSON.stringify(usr));
+    document.getElementById("tela-login").style.display="none";
+    const app=document.getElementById("app");
+    app.style.display="flex";app.style.flexDirection="column";
+    document.getElementById("nav-u").textContent=usr.nome;
+    upAll();
+  }else document.getElementById("l-err").style.display="block";
+}
+function logout(){
+  sessionStorage.removeItem("ts");
+  document.getElementById("tela-login").style.display="flex";
+  document.getElementById("app").style.display="none";
+}
+function checkSess(){
+  const s=sessionStorage.getItem("ts");
+  if(s){
+    const u=JSON.parse(s);
+    document.getElementById("tela-login").style.display="none";
+    const app=document.getElementById("app");
+    app.style.display="flex";app.style.flexDirection="column";
+    document.getElementById("nav-u").textContent=u.nome;
+  }
+}
+
+// ===== CLIENTES =====
+function addCli(){
+  const n=gv("cl-n"),t=gv("cl-t");
+  if(!n||!t){alert("Preencha Nome e WhatsApp");return}
+  D.clientes.push({id:Date.now(),nome:n,tel:t,cpf:gv("cl-cpf"),cnpj:gv("cl-cnpj"),email:gv("cl-e"),cidade:gv("cl-c"),end:gv("cl-end"),origem:gv("cl-or"),obs:gv("cl-obs"),status:"Novo Lead"});
+  clrAll(["cl-n","cl-t","cl-cpf","cl-cnpj","cl-e","cl-c","cl-end","cl-obs"]);sv("cl-or","");
+  save();renderCli();
+}
+function editCli(id){
+  _id=id;const c=D.clientes.find(x=>x.id==id);
+  sv("ecl-n",c.nome);sv("ecl-t",c.tel);sv("ecl-cpf",c.cpf||"");
+  sv("ecl-e",c.email||"");sv("ecl-c",c.cidade||"");
+  sv("ecl-st",c.status||"Novo Lead");sv("ecl-obs",c.obs||"");
+  om("m-cl");
+}
+function savCli(){
+  const c=D.clientes.find(x=>x.id==_id);
+  c.nome=gv("ecl-n");c.tel=gv("ecl-t");c.cpf=gv("ecl-cpf");
+  c.email=gv("ecl-e");c.cidade=gv("ecl-c");c.status=gv("ecl-st");c.obs=gv("ecl-obs");
+  save();fm("m-cl");renderCli();
+}
+function delCli(id){if(!confirm("Excluir cliente?"))return;D.clientes=D.clientes.filter(x=>x.id!=id);save();renderCli()}
+function renderCli(){
+  const tb=document.getElementById("cl-tb");
+  if(!D.clientes.length){tb.innerHTML='<tr class="er"><td colspan="7">Nenhum cliente</td></tr>';return}
+  tb.innerHTML=D.clientes.map(c=>`<tr>
+    <td><strong>${c.nome}</strong></td><td>${c.cpf||c.cnpj||"-"}</td>
+    <td>${c.tel||"-"}</td><td>${c.cidade||"-"}</td><td>${c.origem||"-"}</td>
+    <td><span class="badge ${c.status==="Fechado"?"bok":c.status==="Perdido"?"bdg":"bw"}">${c.status||"Novo Lead"}</span></td>
+    <td><button class="btn bsm bbl" onclick="editCli(${c.id})">Editar</button><button class="btn bsm brd" onclick="delCli(${c.id})">Excluir</button></td>
+  </tr>`).join("");
+  const s=document.getElementById("or-c");
+  s.innerHTML='<option value="">Selecione</option>';
+  D.clientes.forEach(c=>s.innerHTML+=`<option value="${c.id}">${c.nome}</option>`);
+}
+
+// ===== ORCAMENTOS - SERVICOS =====
+const tiposSvc=["Retro Escavadeira","Caminhao Basculante","D20/Caminhonete","Motoniveladora","Compactador","Transporte de Terra","Nivelamento","Aterro","Escavacao","Outros"];
+function addSR(){SR.push({id:Date.now(),tipo:"",hrs:0,vh:0,vg:0,vvg:0});renderSR()}
+function updSR(id,k,v){const s=SR.find(x=>x.id==id);if(s){s[k]=k==="tipo"?v:parseFloat(v)||0}renderSR()}
+function remSR(id){SR=SR.filter(x=>x.id!=id);renderSR()}
+function calcOrc(){
+  const tot=SR.reduce((s,x)=>s+(x.hrs*x.vh)+(x.vg*x.vvg),0);
+  const ct=[gv("or-cm"),gv("or-co"),gv("or-cd"),gv("or-cdp"),gv("or-cv"),gv("or-cx")].reduce((s,v)=>s+(parseFloat(v)||0),0);
+  const mr=ct>0?(((tot-ct)/ct)*100).toFixed(1):0;
+  document.getElementById("or-ct").textContent=R(ct);
+  document.getElementById("or-vt").textContent=R(tot);
+  document.getElementById("or-mr").textContent=mr+"%";
+}
+function renderSR(){
+  const c=document.getElementById("or-sr");
+  c.innerHTML=SR.map(s=>`<div class="srow">
+    <div class="fg" style="margin:0"><label style="font-size:.75rem">Servico</label>
+      <select onchange="updSR(${s.id},'tipo',this.value)">${tiposSvc.map(t=>`<option value="${t}" ${s.tipo===t?"selected":""}>${t}</option>`).join("")}</select>
+    </div>
+    <div class="fg" style="margin:0"><label style="font-size:.75rem">Horas Est.</label>
+      <input type="number" value="${s.hrs}" min="0" step="0.5" onchange="updSR(${s.id},'hrs',this.value)">
+    </div>
+    <div class="fg" style="margin:0"><label style="font-size:.75rem">Valor/Hora R$</label>
+      <input type="number" value="${s.vh}" min="0" step="0.01" onchange="updSR(${s.id},'vh',this.value)">
+    </div>
+    <div class="fg" style="margin:0"><label style="font-size:.75rem">Viagens / Valor R$</label>
+      <div style="display:flex;gap:.3rem">
+        <input type="number" value="${s.vg}" min="0" step="1" placeholder="viag" style="width:48%" onchange="updSR(${s.id},'vg',this.value)">
+        <input type="number" value="${s.vvg}" min="0" step="0.01" placeholder="R$" style="width:48%" onchange="updSR(${s.id},'vvg',this.value)">
+      </div>
+    </div>
+    <div><label style="font-size:.75rem">Subtotal</label>
+      <div style="font-weight:bold;color:#28a745;padding:.6rem 0">${R((s.hrs*s.vh)+(s.vg*s.vvg))}</div>
+      <button class="btn bsm brd" onclick="remSR(${s.id})">X</button>
+    </div>
+  </div>`).join("");
+  calcOrc();
+}
+
+// ===== ORCAMENTOS =====
+function addOrc(){
+  const cid=gv("or-c"),dt=gv("or-dt"),desc=gv("or-desc").trim();
+  if(!cid||!dt||!desc||!SR.length){alert("Preencha: Cliente, Data, Descricao e adicione ao menos 1 servico");return}
+  const c=D.clientes.find(x=>x.id==cid);
+  const total=SR.reduce((s,x)=>s+(x.hrs*x.vh)+(x.vg*x.vvg),0);
+  const vld=parseInt(gv("or-vl"))||15;
+  const dv=new Date(dt);dv.setDate(dv.getDate()+vld);
+  const ci={cm:parseFloat(gv("or-cm"))||0,co:parseFloat(gv("or-co"))||0,cd:parseFloat(gv("or-cd"))||0,cdp:parseFloat(gv("or-cdp"))||0,cv:parseFloat(gv("or-cv"))||0,cx:parseFloat(gv("or-cx"))||0};
+  D.orcamentos.push({id:Date.now(),num:"ORC-"+Date.now().toString().slice(-6),dt,cid,cN:c.nome,cT:c.tel,desc,loc:gv("or-loc"),svcs:JSON.parse(JSON.stringify(SR)),total,val:dv.toISOString().split("T")[0],cond:gv("or-cp"),resp:gv("or-rp"),ci,status:"Enviado"});
+  c.status="Orcamento Enviado";
+  SR=[];renderSR();
+  clrAll(["or-c","or-dt","or-desc","or-loc","or-cp","or-rp","or-cm","or-co","or-cd","or-cdp","or-cv","or-cx"]);sv("or-vl","15");
+  save();renderOrc();
+}
+function verOrc(id){
+  _orcId=id;const o=D.orcamentos.find(x=>x.id==id);
+  document.getElementById("m-or-t").textContent="Orcamento "+o.num;
+  const svcs=o.svcs.map(s=>`<tr><td>${s.tipo}</td><td>${s.hrs}h</td><td>${R(s.vh)}</td><td>${s.vg}</td><td>${R(s.vvg)}</td><td><strong>${R((s.hrs*s.vh)+(s.vg*s.vvg))}</strong></td></tr>`).join("");
+  document.getElementById("m-or-b").innerHTML=`
+    <p style="margin-bottom:.8rem"><strong>Cliente:</strong> ${o.cN} &nbsp;<strong>Data:</strong> ${fDt(o.dt)} &nbsp;<strong>Validade:</strong> ${fDt(o.val)}</p>
+    <p style="margin-bottom:.8rem"><strong>Descricao:</strong> ${o.desc}</p>
+    <p style="margin-bottom:.8rem"><strong>Local:</strong> ${o.loc||"-"}</p>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:.8rem">
+      <thead><tr style="background:#1a1a1a;color:#FDB913"><th style="padding:.4rem">Servico</th><th>Horas</th><th>Valor/h</th><th>Viagens</th><th>Valor/vg</th><th>Subtotal</th></tr></thead>
+      <tbody>${svcs}</tbody>
+      <tfoot><tr style="background:#FDB913"><td colspan="5" style="padding:.5rem"><strong>VALOR TOTAL</strong></td><td><strong>${R(o.total)}</strong></td></tr></tfoot>
+    </table>
+    <p><strong>Condicao:</strong> ${o.cond||"-"} &nbsp;<strong>Responsavel:</strong> ${o.resp||"-"}</p>`;
+  om("m-or");
+}
+function impOrc(){
+  const o=D.orcamentos.find(x=>x.id==_orcId);
+  const svcs=o.svcs.map(s=>`<tr><td>${s.tipo}</td><td>${s.hrs}h</td><td>${R(s.vh)}</td><td>${s.vg}</td><td>${R(s.vvg)}</td><td><strong>${R((s.hrs*s.vh)+(s.vg*s.vvg))}</strong></td></tr>`).join("");
+  const obs=`<div style="background:#fff3cd;padding:1rem;border-radius:6px;margin-top:1rem;border-left:4px solid #ffc107">
+    <strong>Observacoes Importantes:</strong><ul style="margin:.5rem 0 0 1.5rem">
+    <li>Valores estimados - variam conforme obstaculos no terreno (pedras, raizes, entulho)</li>
+    <li>Em caso de chuva ou condicoes adversas, servico sera reagendado sem custo adicional</li>
+    <li>Quebra de equipamento: horas produtivas cobradas; tempo de reparo nao cobrado</li>
+    <li>Variacao de ate 15% na estimativa de horas e normal para servicos de terraplanagem</li>
+    <li>Orcamento valido ate ${fDt(o.val)}</li>
+    <li>Condicoes de pagamento: ${o.cond||"A combinar"}</li></ul></div>`;
+  const w=window.open("","","width=900,height=700");
+  w.document.write(`<html><head><style>body{font-family:Arial;padding:1.5rem;font-size:12px}h2{color:#333}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:.4rem .5rem}th{background:#1a1a1a;color:#FDB913}.tot{background:#FDB913;font-weight:bold}</style></head><body>
+    <h2>TRATOO - ORCAMENTO No ${o.num}</h2><hr>
+    <p><strong>Cliente:</strong> ${o.cN} | <strong>WhatsApp:</strong> ${o.cT} | <strong>Data:</strong> ${fDt(o.dt)} | <strong>Validade:</strong> ${fDt(o.val)}</p>
+    <p><strong>Servico:</strong> ${o.desc}</p><p><strong>Local:</strong> ${o.loc||"-"}</p>
+    <table><thead><tr><th>Servico</th><th>Horas</th><th>Valor/h</th><th>Viagens</th><th>Valor/vg</th><th>Subtotal</th></tr></thead>
+    <tbody>${svcs}</tbody>
+    <tfoot><tr class="tot"><td colspan="5"><strong>VALOR TOTAL</strong></td><td><strong>${R(o.total)}</strong></td></tr></tfoot></table>
+    ${obs}
+    <p style="margin-top:1rem"><strong>Condicao:</strong> ${o.cond||"-"} | <strong>Responsavel:</strong> ${o.resp||"-"}</p>
+    <p style="color:#888;font-size:.75rem;margin-top:1.5rem;text-align:center">TRATOO - WhatsApp: (14) [numero] - Este orcamento e uma estimativa e pode variar.</p>
+  </body></html>`);
+  w.document.close();w.print();
+}
+function waOrc(){
+  const o=D.orcamentos.find(x=>x.id==_orcId);
+  const tel=(o.cT||"").replace(/\D/g,"");
+  const svcsT=o.svcs.map(s=>`  - ${s.tipo}: ${s.hrs}h + ${s.vg} viagens = ${R((s.hrs*s.vh)+(s.vg*s.vvg))}`).join("\n");
+  const msg=encodeURIComponent(`Ola ${o.cN}! TRATOO\n\nOrcamento No ${o.num}\n\nServico: ${o.desc}\n\nItens:\n${svcsT}\n\nVALOR TOTAL: ${R(o.total)}\nValidade: ${fDt(o.val)}\nCondicao: ${o.cond||"A combinar"}\n\nPara confirmar, responda esta mensagem!`);
+  window.open(`https://wa.me/55${tel}?text=${msg}`,"_blank");
+}
+function waOrc2(id){_orcId=id;waOrc()}
+function impOrc2(id){_orcId=id;impOrc()}
+function verOrc2(id){verOrc(id);om("m-or")}
+function renderOrc(){
+  const tb=document.getElementById("or-tb");
+  if(!D.orcamentos.length){tb.innerHTML='<tr class="er"><td colspan="8">Nenhum orcamento</td></tr>';return}
+  tb.innerHTML=D.orcamentos.map(o=>`<tr>
+    <td><strong>${o.num}</strong></td><td>${fDt(o.dt)}</td><td>${o.cN}</td>
+    <td>${o.desc.substring(0,35)}${o.desc.length>35?"...":""}</td>
+    <td><strong>${R(o.total)}</strong></td><td>${fDt(o.val)}</td>
+    <td><span class="badge bw">${o.status}</span></td>
+    <td><button class="btn bsm bbl" onclick="verOrc2(${o.id})">Ver</button><button class="btn bsm bbl" onclick="impOrc2(${o.id})">Impr.</button><button class="btn bsm bwp" onclick="waOrc2(${o.id})">WA</button></td>
+  </tr>`).join("");
+  const s=document.getElementById("os-oc");
+  s.innerHTML='<option value="">Selecione</option>';
+  D.orcamentos.filter(o=>o.status==="Enviado").forEach(o=>s.innerHTML+=`<option value="${o.id}">${o.num} - ${o.cN}</option>`);
+}
+
+// ===== MAQUINAS =====
+function addMaq(){
+  const n=gv("mq-n"),t=gv("mq-t"),v=parseFloat(gv("mq-v"))||0,s=gv("mq-s");
+  if(!n||!t||!v||!s){alert("Preencha: Nome, Tipo, Valor/Hora, Status");return}
+  D.maquinas.push({id:Date.now(),nome:n,tipo:t,placa:gv("mq-p"),valor:v,aq:parseFloat(gv("mq-aq"))||0,dep:parseFloat(gv("mq-dp"))||0,cons:parseFloat(gv("mq-cs"))||0,gps:gv("mq-gp"),status:s});
+  clrAll(["mq-n","mq-t","mq-p","mq-v","mq-aq","mq-dp","mq-cs","mq-gp","mq-s"]);
+  save();renderMq();
+}
+function histMaq(id){
+  const m=D.maquinas.find(x=>x.id==id);
+  document.getElementById("m-mq-t").textContent="Historico: "+m.nome;
+  const obras=D.obras.filter(o=>o.maqId==id);
+  const mnts=D.manutencao.filter(x=>x.maqId==id);
+  let h=`<p style="margin-bottom:.8rem"><strong>Tipo:</strong> ${m.tipo} | <strong>Placa:</strong> ${m.placa||"-"} | <strong>Status:</strong> ${m.status}</p>`;
+  h+=`<h3 style="font-size:.9rem;border:none;padding:0;margin-bottom:.5rem">Obras Realizadas (${obras.length})</h3>`;
+  if(obras.length)h+=`<table style="width:100%;border-collapse:collapse;font-size:.83rem"><thead><tr style="background:#1a1a1a;color:#FDB913"><th style="padding:.4rem">Data</th><th>OS</th><th>Cliente</th><th>H.Trab</th><th>Valor</th></tr></thead><tbody>${obras.map(o=>`<tr><td style="padding:.4rem">${fDt(o.dt)}</td><td>${o.osN}</td><td>${o.cN}</td><td>${o.ht}h</td><td>${R(o.valor)}</td></tr>`).join("")}</tbody></table>`;
+  else h+='<p style="color:#aaa;font-style:italic">Nenhuma obra</p>';
+  h+=`<h3 style="font-size:.9rem;border:none;padding:0;margin:1rem 0 .5rem">Manutencoes (${mnts.length})</h3>`;
+  if(mnts.length)h+=`<table style="width:100%;border-collapse:collapse;font-size:.83rem"><thead><tr style="background:#1a1a1a;color:#FDB913"><th style="padding:.4rem">Data</th><th>Tipo</th><th>Servico</th><th>Custo</th></tr></thead><tbody>${mnts.map(m=>`<tr><td style="padding:.4rem">${fDt(m.dt)}</td><td>${m.tipo}</td><td>${m.desc.substring(0,40)}</td><td>${R(m.custo)}</td></tr>`).join("")}</tbody></table>`;
+  else h+='<p style="color:#aaa;font-style:italic">Nenhuma manutencao</p>';
+  document.getElementById("m-mq-b").innerHTML=h;om("m-mq");
+}
+function renderMq(){
+  const tb=document.getElementById("mq-tb");
+  if(!D.maquinas.length){tb.innerHTML='<tr class="er"><td colspan="9">Nenhuma maquina</td></tr>';return}
+  tb.innerHTML=D.maquinas.map(m=>`<tr>
+    <td><strong>${m.nome}</strong></td><td>${m.tipo}</td><td>${m.placa||"-"}</td>
+    <td>${R(m.valor)}</td><td>${m.dep>0?R(m.dep):"-"}</td><td>${m.cons>0?m.cons+"L/h":"-"}</td>
+    <td>${m.gps||"-"}</td>
+    <td><span class="badge ${m.status==="Ativa"?"bok":m.status==="Manutencao"?"bw":"bdg"}">${m.status}</span></td>
+    <td><button class="btn bsm bbl" onclick="histMaq(${m.id})">Historico</button></td>
+  </tr>`).join("");
+  ["ds-mq","mn-mq"].forEach(sid=>{
+    const s=document.getElementById(sid);
+    if(s){s.innerHTML='<option value="">Selecione</option>';D.maquinas.forEach(m=>s.innerHTML+=`<option value="${m.id}">${m.nome}</option>`)}
+  });
+}
+
+// ===== OPERADORES =====
+function addOp(){
+  const n=gv("op-n"),cpf=gv("op-cpf"),f=gv("op-f"),t=gv("op-t"),v=parseFloat(gv("op-v"))||0;
+  if(!n||!cpf||!f||!t||!v){alert("Preencha todos os campos");return}
+  D.operadores.push({id:Date.now(),nome:n,cpf,func:f,tipo:t,valor:v,fpag:gv("op-fp"),tel:gv("op-w")});
+  clrAll(["op-n","op-cpf","op-f","op-t","op-v","op-fp","op-w"]);
+  save();renderOp();
+}
+function verPonto(id){
+  const op=D.operadores.find(x=>x.id==id);
+  document.getElementById("m-pt-t").textContent="Cartao de Ponto: "+op.nome;
+  const obras=D.obras.filter(o=>o.opId==id);
+  let tH=0,tP=0;
+  const rows=obras.map(o=>{
+    const c=op.tipo==="Hora"?o.ht*op.valor:op.tipo==="Diaria"?op.valor:op.tipo==="Mensal"?op.valor/30:op.valor;
+    tH+=o.ht||0;tP+=c;
+    return`<tr><td style="padding:.4rem">${fDt(o.dt)}</td><td>${o.osN}</td><td>${o.cN}</td><td>${o.ht}h</td><td>${R(c)}</td></tr>`;
+  }).join("");
+  document.getElementById("m-pt-b").innerHTML=`
+    <p style="margin-bottom:.8rem"><strong>Funcao:</strong> ${op.func} | <strong>Tipo:</strong> ${op.tipo} | <strong>Valor:</strong> ${R(op.valor)} | <strong>F.Pagamento:</strong> ${op.fpag||"-"}</p>
+    <table style="width:100%;border-collapse:collapse;font-size:.83rem">
+      <thead><tr style="background:#1a1a1a;color:#FDB913"><th style="padding:.4rem">Data</th><th>OS</th><th>Cliente</th><th>H.Trab</th><th>Valor</th></tr></thead>
+      <tbody>${rows||'<tr><td colspan="5" style="text-align:center;color:#aaa;padding:1rem">Nenhuma obra</td></tr>'}</tbody>
+      <tfoot><tr style="background:#FDB913;font-weight:bold"><td colspan="3" style="padding:.5rem">TOTAL</td><td>${tH}h</td><td>${R(tP)}</td></tr></tfoot>
+    </table>`;
+  om("m-pt");
+}
+function impPonto(){
+  const w=window.open("","","width=800,height=600");
+  w.document.write("<html><body>"+document.getElementById("m-pt-b").innerHTML+"</body></html>");
+  w.document.close();w.print();
+}
+function renderOp(){
+  const tb=document.getElementById("op-tb");
+  if(!D.operadores.length){tb.innerHTML='<tr class="er"><td colspan="8">Nenhum operador</td></tr>';return}
+  tb.innerHTML=D.operadores.map(o=>`<tr>
+    <td><strong>${o.nome}</strong></td><td>${o.cpf}</td><td>${o.func}</td><td>${o.tipo}</td>
+    <td>${R(o.valor)}</td><td>${o.fpag||"-"}</td><td>${o.tel||"-"}</td>
+    <td><button class="btn bsm bbl" onclick="verPonto(${o.id})">Ponto</button></td>
+  </tr>`).join("");
+  const s=document.getElementById("os-op");
+  s.innerHTML='<option value="">Selecione</option>';
+  D.operadores.forEach(o=>s.innerHTML+=`<option value="${o.id}">${o.nome} (${o.func})</option>`);
+  const sd=document.getElementById("ds-op");
+  if(sd){sd.innerHTML='<option value="">Selecione</option>';D.operadores.forEach(o=>sd.innerHTML+=`<option value="${o.id}">${o.nome}</option>`)}
+}
+
+// ===== FORNECEDORES =====
+function addForn(){
+  const n=gv("fn-n"),c=gv("fn-c");
+  if(!n||!c){alert("Preencha Nome e Categoria");return}
+  D.fornecedores.push({id:Date.now(),nome:n,cnpj:gv("fn-cnpj"),cat:c,tel:gv("fn-t")});
+  clrAll(["fn-n","fn-cnpj","fn-c","fn-t"]);
+  save();renderFn();
+}
+function delForn(id){if(!confirm("Excluir?"))return;D.fornecedores=D.fornecedores.filter(x=>x.id!=id);save();renderFn()}
+function renderFn(){
+  const tb=document.getElementById("fn-tb");
+  if(!D.fornecedores.length){tb.innerHTML='<tr class="er"><td colspan="5">Nenhum fornecedor</td></tr>';return}
+  tb.innerHTML=D.fornecedores.map(f=>`<tr>
+    <td><strong>${f.nome}</strong></td><td>${f.cnpj||"-"}</td><td>${f.cat}</td><td>${f.tel||"-"}</td>
+    <td><button class="btn bsm brd" onclick="delForn(${f.id})">Excluir</button></td>
+  </tr>`).join("");
+  ["mn-fn"].forEach(sid=>{const s=document.getElementById(sid);if(s){s.innerHTML='<option value="">Selecione</option>';D.fornecedores.forEach(f=>s.innerHTML+=`<option value="${f.id}">${f.nome}</option>`)}});
+  const sp=document.getElementById("ds-p");
+  if(sp){sp.innerHTML='<option value="">Selecione</option>';D.fornecedores.filter(f=>f.cat==="Combustivel").forEach(f=>sp.innerHTML+=`<option value="${f.id}">${f.nome}</option>`)}
+}
+
+// ===== OS =====
+function addOS(){
+  const oid=gv("os-oc"),opid=gv("os-op"),di=gv("os-di");
+  if(!oid||!opid||!di){alert("Preencha: Orcamento, Operador, Data Inicio");return}
+  const o=D.orcamentos.find(x=>x.id==oid),op=D.operadores.find(x=>x.id==opid);
+  const maq=o.svcs.map(s=>s.tipo).filter((v,i,a)=>a.indexOf(v)===i).join(", ");
+  const ht=o.svcs.reduce((s,x)=>s+x.hrs,0);
+  D.ordens.push({id:Date.now(),num:"OS-"+Date.now().toString().slice(-6),oid,cid:o.cid,cN:o.cN,cT:o.cT,opid,opN:op.nome,opT:op.tel,maq,ht,svcs:o.svcs,total:o.total,loc:gv("os-lc"),obs:gv("os-ob"),di,df:gv("os-df"),status:"Criada"});
+  o.status="Convertida";
+  clrAll(["os-oc","os-op","os-di","os-df","os-lc","os-ob"]);
+  save();renderOS();
+}
+function verOS(id){
+  _osId=id;const os=D.ordens.find(x=>x.id==id);
+  document.getElementById("m-os-t").textContent="OS "+os.num;
+  const svcs=os.svcs.map(s=>`<tr><td>${s.tipo}</td><td>${s.hrs}h</td><td>${s.vg}</td><td><strong>${R((s.hrs*s.vh)+(s.vg*s.vvg))}</strong></td></tr>`).join("");
+  document.getElementById("m-os-b").innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem;font-size:.9rem">
+      <div><strong>Cliente:</strong> ${os.cN}</div><div><strong>Fone:</strong> ${os.cT}</div>
+      <div><strong>Operador:</strong> ${os.opN}</div><div><strong>Fone Op:</strong> ${os.opT||"-"}</div>
+      <div><strong>Inicio:</strong> ${fDtH(os.di)}</div><div><strong>Fim Prev.:</strong> ${fDtH(os.df)||"-"}</div>
+      <div><strong>Local:</strong> ${os.loc||"-"}</div><div><strong>Maquinas:</strong> ${os.maq}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead><tr style="background:#1a1a1a;color:#FDB913"><th style="padding:.4rem">Servico</th><th>Horas</th><th>Viagens</th><th>Subtotal</th></tr></thead>
+      <tbody>${svcs}</tbody>
+      <tfoot><tr style="background:#FDB913"><td colspan="3" style="padding:.5rem"><strong>TOTAL</strong></td><td><strong>${R(os.total)}</strong></td></tr></tfoot>
+    </table>
+    ${os.obs?`<p style="margin-top:.7rem"><strong>Obs:</strong> ${os.obs}</p>`:""}`;
+}
+function impOS(){
+  const os=D.ordens.find(x=>x.id==_osId);
+  const svcs=os.svcs.map(s=>`<tr><td>${s.tipo}</td><td>${s.hrs}h</td><td>${s.vg}</td><td>${R((s.hrs*s.vh)+(s.vg*s.vvg))}</td></tr>`).join("");
+  const w=window.open("","","width=900,height=700");
+  w.document.write(`<html><head><style>body{font-family:Arial;padding:1.5rem;font-size:12px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:.4rem .5rem}th{background:#1a1a1a;color:#FDB913}.tot{background:#FDB913;font-weight:bold}.grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:.7rem 0}</style></head><body>
+    <h2>TRATOO - ORDEM DE SERVICO No ${os.num}</h2><hr>
+    <div class="grid">
+      <div><strong>Cliente:</strong> ${os.cN}</div><div><strong>Fone:</strong> ${os.cT}</div>
+      <div><strong>Operador:</strong> ${os.opN}</div><div><strong>Fone Op:</strong> ${os.opT||"-"}</div>
+      <div><strong>Inicio:</strong> ${fDtH(os.di)}</div><div><strong>Fim Prev.:</strong> ${fDtH(os.df)||"-"}</div>
+      <div><strong>Local:</strong> ${os.loc||"-"}</div><div><strong>Maquinas:</strong> ${os.maq}</div>
+    </div>
+    <table><thead><tr><th>Servico / Equipamento</th><th>Horas Prev.</th><th>Viagens</th><th>Subtotal</th></tr></thead>
+    <tbody>${svcs}</tbody>
+    <tfoot><tr class="tot"><td colspan="3"><strong>VALOR TOTAL</strong></td><td><strong>${R(os.total)}</strong></td></tr></tfoot></table>
+    ${os.obs?`<p style="margin-top:.7rem"><strong>Obs:</strong> ${os.obs}</p>`:""}
+    <div style="margin-top:2rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem">
+      <div style="border-top:1px solid #333;padding-top:.5rem;text-align:center">Assinatura Operador</div>
+      <div style="border-top:1px solid #333;padding-top:.5rem;text-align:center">Assinatura Cliente</div>
+    </div>
+    <p style="color:#888;font-size:.75rem;margin-top:1.5rem;text-align:center">TRATOO - WhatsApp: (14) [numero] - @tratoo</p>
+  </body></html>`);
+  w.document.close();w.print();
+}
+function waOSC(){
+  const os=D.ordens.find(x=>x.id==_osId);
+  const tel=(os.cT||"").replace(/\D/g,"");
+  const msg=encodeURIComponent(`Ola ${os.cN}! TRATOO\n\nOS ${os.num} criada!\nInicio: ${fDtH(os.di)}\nMaquinas: ${os.maq}\nLocal: ${os.loc||"-"}\nValor: ${R(os.total)}\n\nEquipe estara no local na data combinada!`);
+  window.open(`https://wa.me/55${tel}?text=${msg}`,"_blank");
+}
+function waOSO(){
+  const os=D.ordens.find(x=>x.id==_osId);
+  const tel=(os.opT||"").replace(/\D/g,"");
+  const svcsT=os.svcs.map(s=>`  - ${s.tipo}: ${s.hrs}h + ${s.vg} viagens`).join("\n");
+  const msg=encodeURIComponent(`Ola ${os.opN}! TRATOO\n\nOS ${os.num} designada!\nCliente: ${os.cN}\nInicio: ${fDtH(os.di)}\nLocal: ${os.loc||"-"}\n\nServicos:\n${svcsT}\n\nTotal previsto: ${os.ht}h`);
+  window.open(`https://wa.me/55${tel}?text=${msg}`,"_blank");
+}
+function verOS2(id){verOS(id);om("m-os")}
+function impOS2(id){_osId=id;impOS()}
+function renderOS(){
+  const tb=document.getElementById("os-tb");
+  if(!D.ordens.length){tb.innerHTML='<tr class="er"><td colspan="9">Nenhuma OS</td></tr>';return}
+  tb.innerHTML=D.ordens.map(os=>`<tr>
+    <td><strong>${os.num}</strong></td><td>${os.cN}</td><td>${os.opN}</td>
+    <td>${fDtH(os.di)}</td><td>${fDtH(os.df)||"-"}</td><td>${os.maq}</td>
+    <td>${R(os.total)}</td>
+    <td><span class="badge ${os.status==="Finalizada"?"bok":"bw"}">${os.status}</span></td>
+    <td><button class="btn bsm bbl" onclick="verOS2(${os.id})">Ver</button><button class="btn bsm bbl" onclick="impOS2(${os.id})">Impr.</button></td>
+  </tr>`).join("");
+  const s=document.getElementById("ob-os");
+  s.innerHTML='<option value="">Selecione</option>';
+  D.ordens.filter(o=>o.status!=="Finalizada").forEach(os=>s.innerHTML+=`<option value="${os.id}">${os.num} - ${os.cN}</option>`);
+  const sd=document.getElementById("ds-os");
+  if(sd){sd.innerHTML='<option value="">Nenhuma</option>';D.ordens.forEach(os=>sd.innerHTML+=`<option value="${os.id}">${os.num}</option>`)}
+  renderAg();
+}
+
+// ===== AGENDA =====
+function renderAg(){
+  const tb=document.getElementById("ag-tb");
+  if(!D.ordens.length){tb.innerHTML='<tr class="er"><td colspan="7">Nenhuma OS agendada</td></tr>';return}
+  tb.innerHTML=D.ordens.map(os=>`<tr>
+    <td>${fDt(os.di&&os.di.split("T")[0])}</td><td><strong>${os.num}</strong></td>
+    <td>${os.cN}</td><td>${os.opN}</td><td>${os.maq}</td><td>${os.loc||"-"}</td>
+    <td><span class="badge ${os.status==="Finalizada"?"bok":"bw"}">${os.status}</span></td>
+  </tr>`).join("");
+}
+function renderCal(){
+  const m=calM.getMonth(),y=calM.getFullYear();
+  const mn=["Janeiro","Fevereiro","Marco","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+  document.getElementById("cal-t").textContent=mn[m]+" "+y;
+  const fd=new Date(y,m,1).getDay(),ld=new Date(y,m+1,0).getDate();
+  let h='<div class="cgrid">';
+  ["Dom","Seg","Ter","Qua","Qui","Sex","Sab"].forEach(d=>h+=`<div class="cwd">${d}</div>`);
+  for(let i=0;i<fd;i++)h+='<div class="cday om"></div>';
+  for(let d=1;d<=ld;d++){
+    const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const evs=D.ordens.filter(o=>o.di&&o.di.startsWith(ds));
+    h+=`<div class="cday"><div class="cdn">${d}</div>${evs.map(e=>`<div class="cev">${e.num}</div>`).join("")}</div>`;
+  }
+  h+="</div>";
+  document.getElementById("cal-b").innerHTML=h;
+  renderAg();
+}
+function navCal(d){calM.setMonth(calM.getMonth()+d);renderCal()}
+
+// ===== OBRAS =====
+function finObra(){
+  const osid=gv("ob-os"),dt=gv("ob-dt"),ht=parseFloat(gv("ob-ht"))||0;
+  if(!osid||!dt||!ht){alert("Preencha: OS, Data, Horas Trabalhadas");return}
+  const os=D.ordens.find(x=>x.id==osid);
+  const op=D.operadores.find(x=>x.id==os.opid);
+  const ida=parseFloat(gv("ob-id"))||0,vt=parseFloat(gv("ob-vt"))||0;
+  const vg=parseInt(gv("ob-vg"))||0,dsl=parseFloat(gv("ob-ds"))||0,pdsl=parseFloat(gv("ob-pd"))||5.5;
+  let cOp=0;if(op)cOp=op.tipo==="Hora"?ht*op.valor:op.tipo==="Diaria"?op.valor:op.tipo==="Mensal"?op.valor/30:op.valor;
+  const cDsl=dsl*pdsl;
+  D.obras.push({id:Date.now(),osN:os.num,osId:osid,cid:os.cid,cN:os.cN,opId:os.opid,opN:os.opN,maqId:null,maq:os.maq,dt,ida,vt,ht,vg,dsl,valor:os.total,cOp,cDsl,obs:gv("ob-obs")});
+  // Gera A Receber
+  const dv=new Date(dt);dv.setDate(dv.getDate()+7);
+  D.receber.push({id:Date.now(),emis:dt,venc:dv.toISOString().split("T")[0],cli:os.cN,desc:"Faturamento - "+os.num,valor:os.total,fEsp:"PIX",status:"Pendente"});
+  // Gera A Pagar operador
+  if(op&&cOp>0){const dp=new Date(dt);dp.setDate(dp.getDate()+30);D.pagar.push({id:Date.now(),ben:op.nome,desc:"Pagamento Operador - "+os.num,cat:"Salario Operador",tipo:"Variavel",valor:cOp,venc:dp.toISOString().split("T")[0],prio:"Normal",status:"Aberto"})}
+  os.status="Finalizada";
+  clrAll(["ob-os","ob-dt","ob-obs"]);
+  ["ob-id","ob-vt","ob-ht","ob-vg","ob-ds"].forEach(i=>sv(i,"0"));sv("ob-pd","5.50");
+  save();renderObras();alert("Obra finalizada! Contas a Receber e Pagar geradas automaticamente.");
+}
+function renderObras(){
+  const tb=document.getElementById("ob-tb");
+  if(!D.obras.length){tb.innerHTML='<tr class="er"><td colspan="10">Nenhuma obra</td></tr>';return}
+  tb.innerHTML=D.obras.map(o=>`<tr>
+    <td>${fDt(o.dt)}</td><td><strong>${o.osN}</strong></td><td>${o.cN}</td><td>${o.opN}</td>
+    <td>${o.ida}</td><td>${o.vt}</td><td>${o.ht}</td><td>${o.vg}</td>
+    <td>${o.dsl>0?o.dsl+"L":"-"}</td><td><strong>${R(o.valor)}</strong></td>
+  </tr>`).join("");
+}
+
+// ===== DIESEL =====
+function addDs(){
+  const mid=gv("ds-mq"),dt=gv("ds-dt"),l=parseFloat(gv("ds-l"))||0,v=parseFloat(gv("ds-v"))||0;
+  if(!mid||!dt||!l||!v){alert("Preencha: Equipamento, Data, Litros, Valor");return}
+  const m=D.maquinas.find(x=>x.id==mid);
+  const pid=gv("ds-p"),pN=(D.fornecedores.find(x=>x.id==pid)||{nome:"-"}).nome;
+  D.diesel.push({id:Date.now(),maqId:mid,maqN:m.nome,dt,litros:l,valor:v,postoId:pid,postoN:pN,km:gv("ds-km"),osId:gv("ds-os"),opId:gv("ds-op")});
+  clrAll(["ds-mq","ds-dt","ds-l","ds-v","ds-p","ds-km","ds-os","ds-op"]);
+  save();renderDs();
+}
+function renderDs(){
+  const tb=document.getElementById("ds-tb");
+  if(!D.diesel.length){tb.innerHTML='<tr class="er"><td colspan="8">Nenhum registro</td></tr>';return}
+  const tl=D.diesel.reduce((s,d)=>s+d.litros,0),tv=D.diesel.reduce((s,d)=>s+d.valor,0);
+  document.getElementById("ds-tl").textContent=tl.toFixed(1)+"L";
+  document.getElementById("ds-tv").textContent=R(tv);
+  document.getElementById("ds-pm").textContent=tl>0?R(tv/tl):"R$ 0,00";
+  tb.innerHTML=D.diesel.map(d=>`<tr>
+    <td>${fDt(d.dt)}</td><td>${d.maqN}</td><td>${d.postoN||"-"}</td>
+    <td>${d.opId?(D.operadores.find(x=>x.id==d.opId)||{nome:"-"}).nome:"-"}</td>
+    <td>${d.osId?(D.ordens.find(x=>x.id==d.osId)||{num:"-"}).num:"-"}</td>
+    <td><strong>${d.litros}L</strong></td><td>${R(d.valor)}</td><td>${d.km||"-"}</td>
+  </tr>`).join("");
+}
+
+// ===== MANUTENCAO =====
+function addMn(){
+  const mid=gv("mn-mq"),dt=gv("mn-dt"),tp=gv("mn-tp"),desc=gv("mn-desc").trim(),cs=parseFloat(gv("mn-cs"))||0;
+  if(!mid||!dt||!tp||!desc||!cs){alert("Preencha os campos obrigatorios");return}
+  const m=D.maquinas.find(x=>x.id==mid);
+  const fid=gv("mn-fn"),fN=(D.fornecedores.find(x=>x.id==fid)||{nome:"Oficina"}).nome;
+  D.manutencao.push({id:Date.now(),maqId:mid,maqN:m.nome,dt,tipo:tp,fornN:fN,km:gv("mn-km"),prox:gv("mn-px"),desc,custo:cs,gar:gv("mn-gr"),nf:gv("mn-nf"),parado:gv("mn-pd")});
+  // Gera A Pagar
+  const dp=new Date(dt);dp.setDate(dp.getDate()+30);
+  D.pagar.push({id:Date.now(),ben:fN,desc:tp+" - "+m.nome,cat:"Manutencao Maquina",tipo:"Variavel",valor:cs,venc:dp.toISOString().split("T")[0],prio:"Normal",status:"Aberto"});
+  clrAll(["mn-mq","mn-dt","mn-tp","mn-fn","mn-km","mn-px","mn-desc","mn-cs","mn-gr","mn-nf","mn-pd"]);
+  save();
+  const tb=document.getElementById("mn-tb");
+  tb.innerHTML=D.manutencao.map(m=>`<tr>
+    <td>${fDt(m.dt)}</td><td>${m.maqN}</td><td>${m.tipo}</td>
+    <td>${m.desc.substring(0,40)}</td><td>${R(m.custo)}</td><td>${m.prox||"-"}</td>
+    <td>${m.gar?m.gar+" meses":"-"}</td><td>${m.nf||"-"}</td>
+  </tr>`).join("");
+}
+
+// ===== A RECEBER =====
+function abrirRec(id){
+  _id=id;const r=D.receber.find(x=>x.id==id);
+  sv("mr-v",r.valor);sv("mr-dt",hoje());sv("mr-f","");sv("mr-nf","");sv("mr-obs","");
+  om("m-rc");
+}
+function savRec(){
+  const f=gv("mr-f"),dt=gv("mr-dt"),v=parseFloat(gv("mr-v"))||0;
+  if(!f||!dt||!v){alert("Preencha: Forma, Data, Valor");return}
+  const r=D.receber.find(x=>x.id==_id);
+  r.fRec=f;r.dtRec=dt;r.vRec=v;r.nf=gv("mr-nf");r.obs=gv("mr-obs");
+  r.status=v>=r.valor?"Recebido":"Parcial";
+  D.caixa.push({id:Date.now(),dt,tipo:"Receita",desc:"Recebimento - "+r.cli,forma:f,valor:v});
+  save();fm("m-rc");renderRec();
+}
+function renderRec(){
+  const tb=document.getElementById("rc-tb");
+  const hj=hoje();let tt=0,pd=0,rc=0,vc=0;
+  if(!D.receber.length){tb.innerHTML='<tr class="er"><td colspan="10">Nenhuma conta a receber</td></tr>';}
+  else tb.innerHTML=D.receber.map(r=>{
+    tt+=r.valor;if(r.status==="Recebido")rc+=r.vRec||0;else{pd+=r.valor;if(r.venc<hj)vc+=r.valor;}
+    const isV=r.status!=="Recebido"&&r.venc<hj;
+    const st=r.status==="Recebido"?"bok":isV?"bdg":"bw";
+    return`<tr style="${isV?"background:#fff5f5":""}">
+      <td>${fDt(r.emis)}</td><td>${fDt(r.venc)}</td><td>${r.cli}</td><td>${r.desc}</td>
+      <td><strong>${R(r.valor)}</strong></td><td>${r.fEsp||"PIX"}</td>
+      <td><span class="badge ${st}">${isV?"VENCIDO":r.status}</span></td>
+      <td>${fDt(r.dtRec)||"-"}</td><td>${r.fRec||"-"}</td>
+      <td><button class="btn bsm bgr" ${r.status==="Recebido"?"disabled":""} onclick="abrirRec(${r.id})">Baixar</button></td>
+    </tr>`;
+  }).join("");
+  document.getElementById("rc-tt").textContent=R(tt);
+  document.getElementById("rc-pd").textContent=R(pd);
+  document.getElementById("rc-rc").textContent=R(rc);
+  document.getElementById("rc-vc").textContent=R(vc);
+  document.getElementById("rc-tx").textContent=(tt>0?((rc/tt)*100).toFixed(1):0)+"%";
+}
+
+// ===== A PAGAR =====
+function addPg(){
+  const b=gv("pg-b"),d=gv("pg-d"),c=gv("pg-c"),v=parseFloat(gv("pg-v"))||0,vc=gv("pg-vc");
+  if(!b||!d||!c||!v||!vc){alert("Preencha todos os campos");return}
+  D.pagar.push({id:Date.now(),ben:b,desc:d,cat:c,tipo:gv("pg-tp"),valor:v,venc:vc,prio:gv("pg-pr"),status:"Aberto"});
+  clrAll(["pg-b","pg-d","pg-c","pg-v","pg-vc"]);
+  save();renderPg();
+}
+function editPg(id){
+  _id=id;const p=D.pagar.find(x=>x.id==id);
+  sv("ep-b",p.ben);sv("ep-d",p.desc);sv("ep-v",p.valor);sv("ep-vc",p.venc);sv("ep-dt",hoje());sv("ep-f","");
+  om("m-pg");
+}
+function savPg(){
+  const p=D.pagar.find(x=>x.id==_id);
+  p.ben=gv("ep-b");p.desc=gv("ep-d");p.valor=parseFloat(gv("ep-v"))||0;p.venc=gv("ep-vc");
+  save();fm("m-pg");renderPg();
+}
+function baixaPg(){
+  const f=gv("ep-f"),dt=gv("ep-dt");
+  if(!f||!dt){alert("Preencha Forma e Data de Pagamento");return}
+  const p=D.pagar.find(x=>x.id==_id);
+  p.status="Pago";p.fPag=f;p.dtPag=dt;
+  D.caixa.push({id:Date.now(),dt,tipo:"Despesa",desc:"Pagamento - "+p.ben,forma:f,valor:p.valor});
+  save();fm("m-pg");renderPg();
+}
+function delPg(id){if(!confirm("Excluir conta?"))return;D.pagar=D.pagar.filter(x=>x.id!=id);save();renderPg()}
+function renderPg(){
+  const tb=document.getElementById("pg-tb");
+  const hj=hoje();let tt=0,ab=0,pg=0,vc=0;
+  if(!D.pagar.length){tb.innerHTML='<tr class="er"><td colspan="9">Nenhuma conta</td></tr>';}
+  else tb.innerHTML=D.pagar.map(p=>{
+    tt+=p.valor;if(p.status==="Aberto")ab+=p.valor;if(p.status==="Pago")pg+=p.valor;
+    if(p.status==="Aberto"&&p.venc<hj)vc+=p.valor;
+    const isV=p.status==="Aberto"&&p.venc<hj;
+    const st=p.status==="Pago"?"bok":isV?"bdg":"bw";
+    return`<tr style="${isV?"background:#fff5f5":""}${p.status==="Pago"?"opacity:.7":""}">
+      <td>${p.ben}</td><td>${p.desc}</td><td><span class="badge bi">${p.cat||"-"}</span></td>
+      <td><strong>${R(p.valor)}</strong></td><td>${fDt(p.venc)}</td>
+      <td><span class="badge ${p.tipo==="Fixo"?"bpp":"bi"}">${p.tipo||"Variavel"}</span></td>
+      <td><span class="badge ${p.prio==="Urgente"?"bdg":p.prio==="Alta"?"bw":"bi"}">${p.prio||"Normal"}</span></td>
+      <td><span class="badge ${st}">${isV?"VENCIDO":p.status}</span></td>
+      <td><button class="btn bsm bbl" onclick="editPg(${p.id})">Editar</button><button class="btn bsm brd" onclick="delPg(${p.id})">Del</button></td>
+    </tr>`;
+  }).join("");
+  document.getElementById("pg-tt").textContent=R(tt);
+  document.getElementById("pg-ab").textContent=R(ab);
+  document.getElementById("pg-pg").textContent=R(pg);
+  document.getElementById("pg-vc2").textContent=R(vc);
+}
+
+// ===== CAIXA =====
+function renderCx(){
+  const tb=document.getElementById("cx-tb");
+  if(!D.caixa.length){tb.innerHTML='<tr class="er"><td colspan="7">Nenhum lancamento</td></tr>';return}
+  let px=0,bl=0,cr=0,ch=0,dn=0,sl=0;
+  tb.innerHTML=[...D.caixa].sort((a,b)=>a.dt>b.dt?1:-1).map(c=>{
+    const isR=c.tipo==="Receita";
+    if(c.forma==="PIX")px+=isR?c.valor:-c.valor;
+    else if(c.forma==="Boleto")bl+=isR?c.valor:-c.valor;
+    else if(c.forma&&c.forma.startsWith("Cartao"))cr+=isR?c.valor:-c.valor;
+    else if(c.forma==="Cheque")ch+=isR?c.valor:-c.valor;
+    else if(c.forma==="Dinheiro")dn+=isR?c.valor:-c.valor;
+    sl+=isR?c.valor:-c.valor;
+    return`<tr>
+      <td>${fDt(c.dt)}</td><td>${c.tipo}</td><td>${c.desc}</td><td>${c.forma||"-"}</td>
+      <td style="color:#28a745">${isR?R(c.valor):"-"}</td>
+      <td style="color:#dc3545">${!isR?R(c.valor):"-"}</td>
+      <td><strong>${R(sl)}</strong></td>
+    </tr>`;
+  }).join("");
+  document.getElementById("cx-px").textContent=R(px);
+  document.getElementById("cx-bl").textContent=R(bl);
+  document.getElementById("cx-cr").textContent=R(cr);
+  document.getElementById("cx-ch").textContent=R(ch);
+  document.getElementById("cx-dn").textContent=R(dn);
+  document.getElementById("cx-tt").textContent=R(sl);
+}
+
+// ===== DRE =====
+function renderDRE(){
+  const rr=D.caixa.filter(c=>c.tipo==="Receita").reduce((s,c)=>s+c.valor,0);
+  const dd=D.caixa.filter(c=>c.tipo==="Despesa").reduce((s,c)=>s+c.valor,0);
+  const ll=rr-dd,mm=rr>0?((ll/rr)*100).toFixed(1):0;
+  document.getElementById("dr-r").textContent=R(rr);
+  document.getElementById("dr-d").textContent=R(dd);
+  document.getElementById("dr-l").textContent=R(ll);
+  document.getElementById("dr-m").textContent=mm+"%";
+  const cats={};D.caixa.filter(c=>c.tipo==="Despesa").forEach(c=>{const ct=c.cat||"Outros";cats[ct]=(cats[ct]||0)+c.valor});
+  const tb=document.getElementById("dr-tb");
+  tb.innerHTML=`<tr style="background:#d4edda"><td><strong>Receitas Recebidas</strong></td><td style="color:#28a745"><strong>${R(rr)}</strong></td></tr>`;
+  Object.entries(cats).forEach(([k,v])=>tb.innerHTML+=`<tr><td style="padding-left:1.5rem">(-) ${k}</td><td style="color:#dc3545">(${R(v)})</td></tr>`);
+  tb.innerHTML+=`<tr style="background:#f8d7da"><td><strong>(-) Total Despesas</strong></td><td style="color:#dc3545"><strong>(${R(dd)})</strong></td></tr>`;
+  tb.innerHTML+=`<tr style="background:#FDB913"><td><strong>= LUCRO OPERACIONAL</strong></td><td><strong>${R(ll)}</strong></td></tr>`;
+  tb.innerHTML+=`<tr><td><strong>Margem Operacional</strong></td><td><strong>${mm}%</strong></td></tr>`;
+}
+
+// ===== SOCIETARIO =====
+function renderSoc(){
+  const md=gv("sc-m"),ft=parseFloat(gv("sc-ft"))||0,dp=parseFloat(gv("sc-dp"))||0;
+  document.getElementById("sc-pl").style.display=md==="pl"?"block":"none";
+  let h="";
+  if(md==="7030"){
+    const op=ft*.7,adm=ft*.3,lo=op-dp*.7,la=adm-dp*.3;
+    h=`<div class="box"><h3>Modelo 70/30</h3><div class="cards">
+      <div class="card"><div class="ct">Faturamento</div><div class="cv">${R(ft)}</div></div>
+      <div class="card"><div class="ct">70% Operacao</div><div class="cv">${R(op)}</div></div>
+      <div class="card"><div class="ct">30% Administracao</div><div class="cv">${R(adm)}</div></div>
+      <div class="card"><div class="ct">Lucro Operacao</div><div class="cv" style="color:#28a745">${R(lo)}</div></div>
+      <div class="card"><div class="ct">Lucro Administracao</div><div class="cv" style="color:#0066cc">${R(la)}</div></div>
+      <div class="card"><div class="ct">Lucro Total</div><div class="cv" style="color:#28a745">${R(lo+la)}</div></div>
+    </div></div>`;
+  }else{
+    const pl=parseFloat(gv("sc-p"))||0,lc=parseFloat(gv("sc-l"))||0,ll=ft-dp-pl-lc;
+    h=`<div class="box"><h3>Modelo Pro-Labore + Locacao</h3><div class="cards">
+      <div class="card"><div class="ct">Faturamento</div><div class="cv">${R(ft)}</div></div>
+      <div class="card"><div class="ct">(-) Pro-Labore</div><div class="cv" style="color:#dc3545">${R(pl)}</div></div>
+      <div class="card"><div class="ct">(-) Locacao Equip.</div><div class="cv" style="color:#dc3545">${R(lc)}</div></div>
+      <div class="card"><div class="ct">(-) Despesas</div><div class="cv" style="color:#dc3545">${R(dp)}</div></div>
+      <div class="card"><div class="ct">Lucro Liquido</div><div class="cv" style="color:#28a745">${R(ll)}</div></div>
+      <div class="card"><div class="ct">Margem</div><div class="cv">${ft>0?((ll/ft)*100).toFixed(1):0}%</div></div>
+    </div></div>`;
+  }
+  document.getElementById("sc-res").innerHTML=h;
+}
+
+// ===== RELATORIOS =====
+function gerarRel(){
+  const tp=gv("rl-tp"),di=gv("rl-di"),df=gv("rl-df");
+  let dados=[],cols=[],rows="";
+  if(tp==="obras"){dados=D.obras.filter(o=>(!di||o.dt>=di)&&(!df||o.dt<=df));cols=["Data","OS","Cliente","Operador","H.IDA","H.VOLTA","H.TRAB","Viagens","Diesel","Valor"];rows=dados.map(o=>`<tr><td>${fDt(o.dt)}</td><td>${o.osN}</td><td>${o.cN}</td><td>${o.opN}</td><td>${o.ida}</td><td>${o.vt}</td><td>${o.ht}</td><td>${o.vg}</td><td>${o.dsl}L</td><td>${R(o.valor)}</td></tr>`).join("");}
+  else if(tp==="rc"){dados=D.receber.filter(r=>(!di||r.emis>=di)&&(!df||r.emis<=df));cols=["Emissao","Vencimento","Cliente","Descricao","Valor","Status"];rows=dados.map(r=>`<tr><td>${fDt(r.emis)}</td><td>${fDt(r.venc)}</td><td>${r.cli}</td><td>${r.desc}</td><td>${R(r.valor)}</td><td>${r.status}</td></tr>`).join("");}
+  else if(tp==="pg"){dados=D.pagar.filter(p=>(!di||p.venc>=di)&&(!df||p.venc<=df));cols=["Beneficiario","Descricao","Categoria","Valor","Vencimento","Tipo","Status"];rows=dados.map(p=>`<tr><td>${p.ben}</td><td>${p.desc}</td><td>${p.cat||"-"}</td><td>${R(p.valor)}</td><td>${fDt(p.venc)}</td><td>${p.tipo}</td><td>${p.status}</td></tr>`).join("");}
+  else if(tp==="cx"){dados=D.caixa.filter(c=>(!di||c.dt>=di)&&(!df||c.dt<=df));cols=["Data","Tipo","Descricao","Forma","Valor"];rows=dados.map(c=>`<tr><td>${fDt(c.dt)}</td><td>${c.tipo}</td><td>${c.desc}</td><td>${c.forma||"-"}</td><td>${R(c.valor)}</td></tr>`).join("");}
+  else if(tp==="ds"){dados=D.diesel.filter(d=>(!di||d.dt>=di)&&(!df||d.dt<=df));cols=["Data","Equipamento","Posto","Litros","Valor","KM/Hr"];rows=dados.map(d=>`<tr><td>${fDt(d.dt)}</td><td>${d.maqN}</td><td>${d.postoN||"-"}</td><td>${d.litros}L</td><td>${R(d.valor)}</td><td>${d.km||"-"}</td></tr>`).join("");}
+  else if(tp==="mn"){dados=D.manutencao.filter(m=>(!di||m.dt>=di)&&(!df||m.dt<=df));cols=["Data","Equipamento","Tipo","Servico","Custo","NF"];rows=dados.map(m=>`<tr><td>${fDt(m.dt)}</td><td>${m.maqN}</td><td>${m.tipo}</td><td>${m.desc.substring(0,40)}</td><td>${R(m.custo)}</td><td>${m.nf||"-"}</td></tr>`).join("");}
+  else if(tp==="cli"){dados=D.clientes;cols=["Nome","CPF/CNPJ","WhatsApp","Cidade","Origem","Status"];rows=dados.map(c=>`<tr><td>${c.nome}</td><td>${c.cpf||c.cnpj||"-"}</td><td>${c.tel||"-"}</td><td>${c.cidade||"-"}</td><td>${c.origem||"-"}</td><td>${c.status||"-"}</td></tr>`).join("");}
+  const area=document.getElementById("rl-area");
+  if(!dados.length){area.innerHTML='<div class="al aw">Nenhum dado encontrado para o periodo selecionado.</div>';return}
+  area.innerHTML=`<div class="tbl"><table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function impRel(){const a=document.getElementById("rl-area");if(!a.innerHTML){alert("Gere um relatorio primeiro");return}const w=window.open("","","width=900,height=700");w.document.write(`<html><head><style>body{font-family:Arial;padding:1.5rem;font-size:12px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:.4rem .5rem}th{background:#1a1a1a;color:#FDB913}</style></head><body><h2>TRATOO ERP - Relatorio</h2>${a.innerHTML}</body></html>`);w.document.close();w.print()}
+function expDados(){const b=new Blob([JSON.stringify(D,null,2)],{type:"application/json"});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download="tratoo_backup_"+hoje()+".json";a.click();URL.revokeObjectURL(u)}
+
+// ===== USUARIOS =====
+function addUsr(){
+  const n=gv("us-n"),u=gv("us-u"),s=gv("us-s"),p=gv("us-p");
+  if(!n||!u||!s){alert("Preencha todos os campos");return}
+  if(D.usuarios.find(x=>x.user===u)){alert("Usuario ja existe");return}
+  D.usuarios.push({id:Date.now(),nome:n,user:u,senha:s,perfil:p});
+  clrAll(["us-n","us-u","us-s"]);save();renderUsr();
+}
+function delUsr(id){if(D.usuarios.length<=1){alert("Deve ter ao menos 1 usuario");return}if(!confirm("Excluir?"))return;D.usuarios=D.usuarios.filter(x=>x.id!=id);save();renderUsr()}
+function renderUsr(){
+  const tb=document.getElementById("us-tb");
+  tb.innerHTML=D.usuarios.map(u=>`<tr><td>${u.nome}</td><td>${u.user}</td><td><span class="badge ${u.perfil==="admin"?"bdg":"bi"}">${u.perfil}</span></td><td><button class="btn bsm brd" onclick="delUsr(${u.id})">Excluir</button></td></tr>`).join("");
+}
+
+// ===== DASHBOARD =====
+function upDash(){
+  const ft=D.obras.reduce((s,o)=>s+o.valor,0);
+  const hr=D.obras.reduce((s,o)=>s+(o.ht||0),0);
+  const ds=D.diesel.reduce((s,d)=>s+d.litros,0);
+  const rcP=D.receber.filter(r=>r.status!=="Recebido").reduce((s,r)=>s+r.valor,0);
+  const pgA=D.pagar.filter(p=>p.status==="Aberto").reduce((s,p)=>s+p.valor,0);
+  const cxR=D.caixa.filter(c=>c.tipo==="Receita").reduce((s,c)=>s+c.valor,0);
+  const cxD=D.caixa.filter(c=>c.tipo==="Despesa").reduce((s,c)=>s+c.valor,0);
+  const cx=cxR-cxD;
+  const mn=D.maquinas.filter(m=>m.status==="Manutencao").length;
+  document.getElementById("d-ft").textContent=R(ft);
+  document.getElementById("d-lc").textContent=R(cxR-cxD);
+  document.getElementById("d-hr").textContent=hr+"h";
+  document.getElementById("d-ob").textContent=D.obras.length;
+  document.getElementById("d-os").textContent=D.ordens.filter(o=>o.status!=="Finalizada").length;
+  document.getElementById("d-rc").textContent=R(rcP);
+  document.getElementById("d-pg").textContent=R(pgA);
+  document.getElementById("d-cx").textContent=R(cx);
+  document.getElementById("d-ds").textContent=ds.toFixed(0)+"L";
+  document.getElementById("d-mn").textContent=mn;
+}
+
+// ===== UP ALL =====
+function upAll(){
+  renderCli();renderOrc();renderOS();renderObras();
+  renderMq();renderOp();renderFn();renderDs();
+  renderRec();renderPg();renderUsr();renderAg();upDash();
+  // Manutencao
+  const mtb=document.getElementById("mn-tb");
+  if(D.manutencao.length)mtb.innerHTML=D.manutencao.map(m=>`<tr><td>${fDt(m.dt)}</td><td>${m.maqN}</td><td>${m.tipo}</td><td>${m.desc.substring(0,40)}</td><td>${R(m.custo)}</td><td>${m.prox||"-"}</td><td>${m.gar?m.gar+" meses":"-"}</td><td>${m.nf||"-"}</td></tr>`).join("");
+}
+
+// ===== INIT =====
+load();
+checkSess();
+addSR(); // 1 servico inicial no orcamento
+</script>
+</body>
+</html>
